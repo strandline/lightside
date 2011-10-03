@@ -1,0 +1,8 @@
+syntax:glob
+.*
+*.class
+*.ser
+*.train
+*.test
+*.model
+*.pred
