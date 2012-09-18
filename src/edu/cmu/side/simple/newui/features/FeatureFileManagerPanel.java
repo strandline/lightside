@@ -130,23 +130,38 @@ public class FeatureFileManagerPanel extends AbstractListPanel{
 					}
 					String textIndex = null;
 					String annotIndex = null;
-					for(String s : annotationTitles){ 
-						if(annotIndex == null && !s.contains("text")) annotIndex = s; 
-						if(s.equalsIgnoreCase("text")) textIndex = s; 
+					for(String s : annotationTitles){
+						String lowers = s.toLowerCase();
+						if(lowers.equals("label") || lowers.equals("class")) annotIndex = s;
+						if(annotIndex == null && !lowers.contains("text") && !lowers.contains("doc")) annotIndex = s;
+						if(lowers.contains("text") || lowers.contains("doc")) textIndex = s; 
 					}
-					SwingToolkit.reloadComboBoxContent(annotationComboBox, 
-							annotationTitles.toArray(new String[0]), 
-							annotationComboBox.getActionListeners(), true);
-					if(textIndex != null){
+					
+					System.out.println(textIndex);
+					System.out.println(annotIndex);
+					
+					if (annotIndex != null)
+						SwingToolkit.reloadComboBoxContent(annotationComboBox, 
+								annotationTitles.toArray(new String[0]), annotIndex,
+								annotationComboBox.getActionListeners(), true);
+					else
+						SwingToolkit.reloadComboBoxContent(annotationComboBox, 
+								annotationTitles.toArray(new String[0]), 
+								annotationComboBox.getActionListeners(), true);
+					
+					annotationTitles.add("[No Text]");
+					if(textIndex != null && annotationTitles.size() < 100){
 						SwingToolkit.reloadComboBoxContent(textColumnComboBox, 
 								annotationTitles.toArray(new String[0]), textIndex, 
 								textColumnComboBox.getActionListeners(), true);						
 					}else{
 						SwingToolkit.reloadComboBoxContent(textColumnComboBox, 
-								annotationTitles.toArray(new String[0]), 
-								textColumnComboBox.getActionListeners(), true);												
+								annotationTitles.toArray(new String[0]), "[No Text]",
+								textColumnComboBox.getActionListeners(), true);		
 					}
-					textColumnComboBox.addItem("[No Text]");
+					annotationTitles.remove("[No Text]");
+					//textColumnComboBox.addItem("[No Text]");
+					
 					if(documents == null){
 						if(listModel.getSize()>0){
 							filenames.clear();
@@ -157,6 +172,7 @@ public class FeatureFileManagerPanel extends AbstractListPanel{
 						}
 					}
 				}catch(Exception ex){
+					listModel.clear();
 					AlertDialog.show("Error!", "CSV File improperly formatted", FeatureFileManagerPanel.this);
 					ex.printStackTrace();
 				}
