@@ -81,7 +81,8 @@ public class SimpleDocumentList implements DocumentListInterface, Serializable{
 		BufferedReader in;
 		textColumn = textCol;
 		currentAnnotation = null;
-		for(String filename : filenames){
+		String[] allfiles = filenames.toArray(new String[0]);
+		for(String filename : allfiles){
 			try{
 				File f = new File(filename);
 				if(!f.exists())
@@ -129,8 +130,11 @@ public class SimpleDocumentList implements DocumentListInterface, Serializable{
 						}
 						showed = true;
 					}
-
+					
+					Set<String> inserted = new HashSet<String>();
 					for(int i = 0; i < instance.length && i < headers.length; i++){
+						if (inserted.contains(headers[i])) continue;
+						inserted.add(headers[i]);
 						String value = instance[i].replaceAll("\"", "").trim();
 						if(i==textColumnIndex)
 							text.add(value);

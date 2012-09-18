@@ -9,7 +9,6 @@ import java.util.List;
 import javax.swing.JLabel;
 
 import edu.cmu.side.dataitem.DocumentListInterface;
-import edu.cmu.side.genesis.control.GenesisUpdater;
 import edu.cmu.side.plugin.SIDEPlugin;
 import edu.cmu.side.simple.feature.FeatureHit;
 import edu.cmu.side.simple.feature.FeatureTable;
@@ -60,7 +59,7 @@ public abstract class FeaturePlugin extends SIDEPlugin implements Serializable{
 	 * @param documents in a corpus
 	 * @return All features that this plugin should extract from each document in this corpus.
 	 */
-	public List<FeatureHit> extractFeatureHits(DocumentListInterface documents, GenesisUpdater update)
+	public List<FeatureHit> extractFeatureHits(DocumentListInterface documents, JLabel update)
 	{
 		this.uiToMemory();
 		// TODO make me abstract.
@@ -87,7 +86,7 @@ public abstract class FeaturePlugin extends SIDEPlugin implements Serializable{
 	 * @param documents
 	 * @return Features for all documents.
 	 */
-	public abstract Collection<FeatureHit> extractFeatureHitsForSubclass(DocumentListInterface documents, GenesisUpdater update);
+	public abstract Collection<FeatureHit> extractFeatureHitsForSubclass(DocumentListInterface documents, JLabel update);
 
 	public void stopWhenPossible(){
 		halt = true;
