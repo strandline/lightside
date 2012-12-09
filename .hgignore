@@ -1,0 +1,17 @@
+syntax:glob
+.*
+*.class
+*.ser
+*csc*
+*.train
+*.test
+*.model
+*.pred
+*convert_cases*
+data/*
+plugins/dependencies.jar
+*.java.orig
+plugins/config.xml.orig
+toolkits/en-sent.bin
+toolkits/englishPCFG_old.ser.gz
+
