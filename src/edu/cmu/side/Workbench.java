@@ -1,6 +1,7 @@
 package edu.cmu.side;
 
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionListener;
@@ -35,12 +36,15 @@ public class Workbench{
 	static GlassPane pane;
 
 	static boolean serverMode = false;
+	static Image iconImage; 
 
 	public Workbench(){
+
+		
+
 		JFrame frame = new JFrame();
-//		Toolkit kit = Toolkit.getDefaultToolkit();
-//		Image img = kit.createImage("toolkits/icons/bulb.png"); 
-//		frame.setIconImage(img); //for windows?
+		frame.setIconImage(iconImage); //for windows?
+		
 		
 		panel = new WorkbenchPanel();
 		panel.setBorder(BorderFactory.createEmptyBorder());
@@ -53,11 +57,32 @@ public class Workbench{
 		frame.pack();
 		frame.setVisible(true);
 		//		pane.setVisible(true);
+		
+		
 		update();
 	}
 
-	public static void main(String[] args) throws Exception{
-		Workbench workbench = new Workbench();
+	public static void main(String[] args) throws Exception
+	{
+
+		Toolkit kit = Toolkit.getDefaultToolkit();
+		iconImage = kit.createImage("toolkits/icons/bulb.png");
+		
+		if(System.getProperty("os.name").equals("Mac OS X"))
+		{
+		    System.setProperty("apple.laf.useScreenMenuBar", "true");
+			System.setProperty("com.apple.mrj.application.apple.menu.about.name", "LightSIDE");
+			com.apple.eawt.Application.getApplication().setDockIconImage(iconImage);
+		}
+		
+		EventQueue.invokeLater(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				Workbench workbench = new Workbench();
+			}
+		});
 	}
 
 	public static void update(){
