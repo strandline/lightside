@@ -1,0 +1,211 @@
+package edu.cmu.side.view.generic;
+
+import java.awt.Color;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.Vector;
+
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.RowSorter.SortKey;
+import javax.swing.SortOrder;
+import javax.swing.event.RowSorterEvent;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
+
+import se.datadosen.component.RiverLayout;
+import edu.cmu.side.model.Recipe;
+import edu.cmu.side.model.data.FeatureTable;
+import edu.cmu.side.model.feature.Feature;
+import edu.cmu.side.plugin.FeatureMetricPlugin;
+import edu.cmu.side.view.util.AbstractListPanel;
+import edu.cmu.side.view.util.FeatureTableModel;
+import edu.cmu.side.view.util.SIDETable;
+
+public abstract class GenericFeatureMetricPanel extends AbstractListPanel {
+
+	protected SIDETable featureTable = new SIDETable();
+	FeatureTableModel model = new FeatureTableModel();
+	FeatureTableModel display = new FeatureTableModel();
+	JTextField text = new JTextField(20);
+
+	protected FeatureTable localTable;
+
+	public GenericFeatureMetricPanel(){
+		setLayout(new RiverLayout());
+		JLabel label = new JLabel("Features in Table:");
+		featureTable.setModel(model);
+		featureTable.setBorder(BorderFactory.createLineBorder(Color.gray));
+
+		JScrollPane tableScroll = new JScrollPane(featureTable);
+		text.addKeyListener(new KeyListener(){
+
+			@Override
+			public void keyPressed(KeyEvent arg0) {}
+
+			@Override
+			public void keyReleased(KeyEvent arg0) {
+				display = filterTable(model, text.getText());
+				featureTable.setModel(display);
+				TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(display);
+				featureTable.setRowSorter(sorter);
+				featureTable.revalidate();
+			}
+
+			@Override
+			public void keyTyped(KeyEvent arg0) {}
+
+		});
+		add("left", label);
+		add("br left", new JLabel("Search:"));
+		add("hfill", text);
+		add("br hfill vfill", tableScroll);
+	}
+
+	public void refreshPanel(Recipe recipe, Map<? extends FeatureMetricPlugin, Map<String, Boolean>> tableEvaluationPlugins, boolean[] mask){
+		int countTrues = 0;
+		for(FeatureMetricPlugin plug : tableEvaluationPlugins.keySet()){
+			for(String s : tableEvaluationPlugins.get(plug).keySet()){
+				if(tableEvaluationPlugins.get(plug).get(s)){
+					countTrues++;
+				}
+			}
+		}
+		FeatureTable newTable = (recipe == null ? null : recipe.getTrainingTable());
+		boolean changeInColumns = (countTrues+1 != model.getColumnCount() || newTable == null || model.getRowCount() != newTable.getFeatureSet().size());
+		if(newTable != localTable || changeInColumns){
+			EvaluateFeaturesTask task = new EvaluateFeaturesTask(getActionBar(), recipe, tableEvaluationPlugins, mask, getTargetAnnotation(), localTable != null || changeInColumns);
+			task.execute();
+		}
+	}
+
+	public FeatureTableModel filterTable(FeatureTableModel ftm, String t){
+		FeatureTableModel disp = new FeatureTableModel();
+		for(int i = 0; i < ftm.getColumnCount(); i++){
+			disp.addColumn(ftm.getColumnName(i));
+		}
+		if(disp.getColumnCount() > 0){
+			for(int i = 0; i < ftm.getRowCount(); i++){
+				if(ftm.getValueAt(i, 0) != null && ftm.getValueAt(i, 0).toString().contains(t)){
+					Vector<Object> row = new Vector<Object>();
+					for(int j = 0; j < ftm.getColumnCount(); j++){
+						row.add(ftm.getValueAt(i,j));
+					}
+					disp.addRow(row);
+				}
+			}			
+		}
+		return disp;
+	}
+
+
+	public class EvaluateFeaturesTask extends ActionBarTask
+	{
+		Recipe recipe;
+		Map<? extends FeatureMetricPlugin, Map<String, Boolean>> tableEvaluationPlugins;
+		boolean[] mask;
+		boolean fill;
+		String target;
+
+		public EvaluateFeaturesTask(ActionBar action, Recipe r, Map<? extends FeatureMetricPlugin, Map<String, Boolean>> plugins, boolean[] m, String t, boolean f)
+		{
+			super(action);
+			fill = f;
+			recipe = r;
+			target = t;
+			tableEvaluationPlugins = plugins;
+			mask = m;
+		}
+
+		@Override
+		protected void doTask(){
+			try
+			{
+				FeatureTable newTable = (recipe == null ? null : recipe.getTrainingTable());
+				model = new FeatureTableModel();
+				localTable = newTable;
+				if(fill){
+					model.addColumn("Feature");
+					int rowCount = 1;
+
+					Map<FeatureMetricPlugin, Map<String, Map<Feature, Comparable>>> evals = new HashMap<FeatureMetricPlugin, Map<String, Map<Feature, Comparable>>>();
+					for(FeatureMetricPlugin plug : tableEvaluationPlugins.keySet()){
+						evals.put(plug, new TreeMap<String, Map<Feature, Comparable>>());
+						for(String s : tableEvaluationPlugins.get(plug).keySet()){
+							if(tableEvaluationPlugins.get(plug).get(s)){
+								model.addColumn(s);
+								rowCount++;
+								FeatureTable current = newTable;
+								Map<Feature, Comparable> values = plug.evaluateFeatures(recipe, mask, s, target, actionBar.update);
+								evals.get(plug).put(s, values);
+							}
+						}
+					}
+					if(localTable != null){
+						for(Feature f : localTable.getFeatureSet()){
+							Vector<Object> row = new Vector<Object>();
+							row.add(getCellObject(f));
+							for(FeatureMetricPlugin plug : tableEvaluationPlugins.keySet()){
+								for(String s : tableEvaluationPlugins.get(plug).keySet()){
+									if(tableEvaluationPlugins.get(plug).get(s)){
+										row.add(evals.get(plug).get(s).get(f));
+									}
+								}
+							}
+							model.addRow(row);
+						}						
+					}
+				}
+
+				List<SortKey> sortKeysToPass = new ArrayList<SortKey>();
+				if(featureTable.getRowSorter() != null){
+					List<? extends SortKey> sortKeys = featureTable.getRowSorter().getSortKeys();
+					for(SortKey key : sortKeys){
+						String colName = featureTable.getColumnName(key.getColumn());
+						SortOrder order = key.getSortOrder();
+						for(int i = 0; i < model.getColumnCount(); i++){
+							if(model.getColumnName(i).equals(colName)){
+								sortKeysToPass.add(new SortKey(i, order));
+							}
+						}
+					}
+				}
+				display = filterTable(model, text.getText());
+				featureTable.setModel(display);
+				TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(display);
+				sorter.setSortKeys(sortKeysToPass);
+				sorter.setSortsOnUpdates(true);
+				featureTable.setRowSorter(sorter);
+				featureTable.sorterChanged(new RowSorterEvent(sorter));
+
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+			finishTask();
+		}
+
+		@Override
+		public void requestCancel()
+		{
+
+		}
+	}
+
+	public Object getCellObject(Object o){
+		return o;
+	}
+
+	public abstract String getTargetAnnotation();
+
+	public abstract ActionBar getActionBar();
+}
