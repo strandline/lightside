@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.swing.ButtonGroup;
-import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -242,6 +241,7 @@ public class BuildTestingPanel extends AbstractListPanel {
 		cvControlPanel.add("br hfill", numFoldSlider);
 	}
 	
+	@Override
 	public void refreshPanel()
 	{
 		updateCVByAnnotationSettings();
@@ -280,6 +280,7 @@ public class BuildTestingPanel extends AbstractListPanel {
 		Recipe recipe = BuildModelControl.getHighlightedFeatureTableRecipe();
 		if(recipe != null)
 		{
+			System.out.println("BTP 283: I exist! "+recipe);
 			DocumentList documentList = recipe.getDocumentList();
 			String[] annotationNames = documentList.getAnnotationNames();
 			Arrays.sort(annotationNames);
