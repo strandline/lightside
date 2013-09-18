@@ -12,7 +12,6 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.TreeSet;
 
 import javax.swing.BorderFactory;
@@ -58,6 +57,7 @@ public abstract class GenericLoadPanel extends AbstractListPanel
 		setLayout(new RiverLayout());
 		combo.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent ae)
 			{
 				if (combo.getSelectedItem() != null)
@@ -305,6 +305,7 @@ public abstract class GenericLoadPanel extends AbstractListPanel
 		checkChooser();
 		
 		Recipe recipe = (Recipe) combo.getSelectedItem();
+		System.out.println("saving "+recipe+" ("+recipe.getStage()+")");
 
 		if (recipe.getStage() == Stage.FEATURE_TABLE || recipe.getStage() == Stage.MODIFIED_TABLE)
 		{
@@ -437,6 +438,7 @@ public abstract class GenericLoadPanel extends AbstractListPanel
 		warn.setVisible(false);
 	}
 	
+	@Override
 	public void setEnabled(boolean enabled)
 	{
 		super.setEnabled(enabled);

@@ -202,22 +202,7 @@ public abstract class LearningPlugin extends SIDEPlugin implements Serializable
 		ArrayList<Double> times = new ArrayList<Double>();
 		DecimalFormat print = new DecimalFormat("#.###");
 
-		// PrintWriter out = null ;
-		// if(foldsFile.exists() && foldsFile.isDirectory())
-		// {
-		// try
-		// {
-		// out = new PrintWriter(new
-		// FileWriter("folds/"+BuildModelControl.getNewName()+".folds.eval.txt"));
-		// }
-		// catch (IOException e1)
-		// {
-		// e1.printStackTrace();
-		// }
-		// out.println(EvaluationUtils.getHeader());
-		// }
-		//
-		for (Integer fold : folds)
+		for(Integer fold : folds)
 		{
 			if (fold < 0)
 			{
@@ -549,8 +534,8 @@ public abstract class LearningPlugin extends SIDEPlugin implements Serializable
 	 */
 	public abstract Object prepareToPredict(FeatureTable originalData, FeatureTable newData, int i, Map<Integer, Integer> foldsMap);
 
-	public void stopWhenPossible()
-	{
+	@Override
+	public void stopWhenPossible(){
 		halt = true;
 	}
 
