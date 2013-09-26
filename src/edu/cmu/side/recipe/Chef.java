@@ -6,21 +6,21 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryUsage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
-
 import javax.swing.JOptionPane;
-
 import plugins.metrics.models.BasicModelEvaluations;
-
 import com.sun.xml.internal.ws.encoding.soap.DeserializationException;
 
+import edu.cmu.side.control.BuildModelControl;
 import edu.cmu.side.model.OrderedPluginMap;
 import edu.cmu.side.model.Recipe;
 import edu.cmu.side.model.RecipeManager.Stage;
@@ -50,7 +50,7 @@ public class Chef
 
 	static StatusUpdater textUpdater = new StatusUpdater()
 	{
-		
+
 		@Override
 		public void update(String updateSlot, int slot1, int slot2)
 		{
@@ -69,7 +69,7 @@ public class Chef
 		public void reset()
 		{
 			// TODO Auto-generated method stub
-			
+
 		}
 	};
 
@@ -79,18 +79,17 @@ public class Chef
 		DocumentList corpus = recipe.getDocumentList();
 		Collection<FeatureHit> hits = new TreeSet<FeatureHit>();
 		OrderedPluginMap extractors = recipe.getExtractors();
-		
+
 		for (SIDEPlugin plug : extractors.keySet())
 		{
 			if(!quiet) System.out.println("Extracting features with "+plug+"...");
 			//System.out.println("Extractor Settings: "+extractors.get(plug));
 			Collection<FeatureHit> extractorHits = ((FeaturePlugin) plug).extractFeatureHits(corpus, extractors.get(plug), textUpdater);
 			hits.addAll(extractorHits);
-			//System.out.println(extractorHits.size()+" hits for "+plug);
 		}
 		FeatureTable ft = new FeatureTable(corpus, hits, threshold, annotation, type);
 		recipe.setFeatureTable(ft);
-		
+
 		if(recipe.getStage().compareTo(Stage.MODIFIED_TABLE) >= 0) //recipe includes filtering
 		{
 			for (SIDEPlugin plug : recipe.getFilters().keySet())
@@ -101,7 +100,42 @@ public class Chef
 			recipe.setFilteredTable(ft);
 		}
 	}
-	
+
+	public static Recipe followSimmerSteps(Recipe originalRecipe, DocumentList corpus, Stage finalStage, int newThreshold){
+		Recipe newRecipe = Recipe.copyEmptyRecipe(originalRecipe);
+
+		prepareDocumentList(originalRecipe, corpus);
+		newRecipe.setDocumentList(corpus);
+
+		if(finalStage == Stage.DOCUMENT_LIST)
+			return newRecipe;
+
+		String annotation = originalRecipe.getAnnotation();
+
+		if(!corpus.allAnnotations().containsKey(annotation))
+			annotation = null;
+
+		simmerFeatures(newRecipe, newThreshold, annotation, originalRecipe.getClassValueType());
+
+		return newRecipe;
+	}
+
+	public static Recipe followRecipeWithTestSet(Recipe originalRecipe, DocumentList corpus, DocumentList testSet, Stage finalStage, int newThreshold) throws Exception{
+		Recipe newRecipe = followSimmerSteps(originalRecipe, corpus, finalStage, newThreshold);
+
+		Map<String, Serializable> validationSettings = new TreeMap<String, Serializable>();
+		validationSettings.put("test", Boolean.TRUE);
+		validationSettings.put("type", "SUPPLY");
+		
+		// Creates a reconciled test set feature table.
+		validationSettings = BuildModelControl.prepareDocuments(newRecipe, validationSettings, testSet);
+
+		newRecipe.setValidationSettings(validationSettings);
+
+		newRecipe = broilModel(newRecipe);
+		return newRecipe;
+	}
+
 	//TODO: be more consistent in parameters to recipe stages
 	public static Recipe followRecipe(Recipe originalRecipe, DocumentList corpus, Stage finalStage, int newThreshold) throws Exception
 	{
@@ -125,10 +159,9 @@ public class Chef
 		
 		if(finalStage.compareTo(Stage.TRAINED_MODEL) < 0)
 			return newRecipe;
-		
+
 		broilModel(newRecipe);
 		printMemoryUsage();
-		
 		return newRecipe;
 	}
 
@@ -138,14 +171,13 @@ public class Chef
 	 * @throws Exception
 	 */
 	//Build Model
-	protected static void broilModel(Recipe newRecipe) throws Exception
+	protected static Recipe broilModel(Recipe newRecipe) throws Exception
 	{
 		if(!quiet) System.out.println("Training model with "+newRecipe.getLearner()+"...");
 		TrainingResult trainResult = newRecipe.getLearner().train(newRecipe.getTrainingTable(), newRecipe.getLearnerSettings(), newRecipe.getValidationSettings(), newRecipe.getWrappers(), textUpdater);
 		newRecipe.setTrainingResult(trainResult);
-		
-		//get the updated settings from the learner, including the trained Weka classifier!
 		newRecipe.setLearnerSettings(newRecipe.getLearner().generateConfigurationSettings());
+		return newRecipe;
 	}
 
 	/**
@@ -160,14 +192,14 @@ public class Chef
 		String currentAnnotation = originalTable.getAnnotation();
 		if(corpus.allAnnotations().containsKey(currentAnnotation))
 		{
-			corpus.setCurrentAnnotation(currentAnnotation, originalTable.getClassValueType());
+			corpus.setCurrentAnnotation(currentAnnotation, originalRecipe.getClassValueType());
 		}
 		else
 		{
 			System.err.println("Warning: data has no "+currentAnnotation+" annotation. You can't train a new model on this data (only predict)");
 		}
-		corpus.setLabelArray(originalTable.getLabelArray());
-		corpus.setTextColumns(new HashSet<String>(original.getTextColumns()));
+		corpus.setLabelArray(originalRecipe.getLabelArray());
+		corpus.setTextColumns(new HashSet<String>(originalRecipe.getTextColumns()));
 	}
 
 
@@ -196,7 +228,7 @@ public class Chef
 		}
 	}
 
-	
+
 	public static void saveRecipe(Recipe newRecipe, File target)
 	{
 		try
@@ -226,7 +258,7 @@ public class Chef
 		outPath = args[1];
 
 		Set<String> corpusFiles = new HashSet<String>();
-		
+
 		String dataFile = "data/MovieReviews.csv";
 		if (args.length < 3) corpusFiles.add(dataFile);
 		else for(int i = 2; i < args.length; i++)
@@ -243,14 +275,11 @@ public class Chef
 		
 		if(result.getStage().compareTo(Stage.TRAINED_MODEL) >= 0)
 		{
-
 			displayTrainingResults(result);
 		}
 
-
 		System.out.println("Saving finished recipe to "+outPath);
 		saveRecipe(result, new File(outPath));
-		
 	}
 
 	protected static void printMemoryUsage()

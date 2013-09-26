@@ -1,7 +1,5 @@
 package edu.cmu.side.plugin;
 
-import junit.framework.TestCase;
-
 import org.junit.*;
 
 /* Things to test:

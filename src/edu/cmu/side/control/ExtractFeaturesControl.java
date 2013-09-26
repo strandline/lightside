@@ -164,6 +164,7 @@ public class ExtractFeaturesControl extends GenesisControl{
 		}
 
 		static boolean updatingCombos = false;
+		@Override
 		public void actionPerformed(ActionEvent ae)
 		{
 			if (!updatingCombos)

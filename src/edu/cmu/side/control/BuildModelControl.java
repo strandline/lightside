@@ -414,7 +414,11 @@ public class BuildModelControl extends GenesisControl{
 
 	public static void prepareDocuments(DocumentList test) throws IllegalStateException
 	{
-		Recipe recipe = getHighlightedFeatureTableRecipe();
+		Recipe rec = getHighlightedFeatureTableRecipe();
+		prepareDocuments(rec, validationSettings, test);
+	}
+		
+	public static Map<String, Serializable> prepareDocuments(Recipe recipe, Map<String, Serializable> validation, DocumentList test) throws IllegalStateException{
 		DocumentList train = recipe.getDocumentList();
 
 		try
@@ -438,6 +442,7 @@ public class BuildModelControl extends GenesisControl{
 		{
 			throw new java.lang.IllegalStateException("Test set annotations do not match training set.\nMissing ["+recipe.getTrainingTable().getAnnotation()+"] or "+train.getTextColumns()+" columns.");
 		}
+		return validationSettings;
 
 
 	}
