@@ -60,18 +60,6 @@ public class DocumentList implements Serializable
 			filenameList.add("Document");
 	}
 	
-
-//	public void setClassValueType(Feature.Type t)
-//	{
-////		System.out.println("DL 48: setting class value type for "+currentAnnotation+" to "+t);
-//		if(t != type)
-//		{
-//			new Exception("tracing setClassValueType").printStackTrace(System.out);
-//			type = t;
-//			labelArray = null;
-//			getLabelArray();
-//		}
-//	}
 	
 	public Feature.Type getValueType(String label)
 	{
@@ -115,30 +103,25 @@ public class DocumentList implements Serializable
 	 */
 	public Feature.Type guessValueType(String label)
 	{
-//		System.out.println("DL 87: guessing type for "+label);
+//		System.out.println("DL 107: guessing type for "+label);
 		
 		Feature.Type localType;
 		for (String s : getPossibleAnn(label))
 		{
+			if(!s.equals(emptyAnnotationString))
 			try
 			{
 				Double.parseDouble(s);
 			}
 			catch (Exception e)
 			{
+//				System.err.println("DL 118: failed to parse "+s+" -- defaulting to nominal for column "+label);
 				localType = Feature.Type.NOMINAL;
-//				if (label.equals(currentAnnotation))
-//				{
-//					setClassValueType(localType);
-//				}
 				return localType;
 			}
 		}
 		localType = Feature.Type.NUMERIC;
-//		if (label.equals(currentAnnotation))
-//		{
-//			setClassValueType(localType);
-//		}
+//		System.err.println("DL 124: parsed every row! Column "+label+" is numeric.");
 		return localType;
 
 	}
@@ -149,6 +132,54 @@ public class DocumentList implements Serializable
 	
 	public String getName(){
 		return name;
+	}
+	
+	public DocumentList subsetSample(double percentage){
+		List<String> newText = new ArrayList<String>();
+		Map<String, List<String>> newAnnotations = new TreeMap<String, List<String>>();
+		for(String s : allAnnotations.keySet()){
+			newAnnotations.put(s, new ArrayList<String>());
+		}
+		int modulo = 10;
+
+		double size = 0.0+getSize();
+		
+		for(int offset = 0; offset < modulo; offset++){
+			int index = 0;
+			while(newText.size() < size*percentage && index+offset < size){
+				int i = index+offset;
+				newText.add(getPrintableTextAt(i));
+				for(String s : allAnnotations.keySet()){
+					newAnnotations.get(s).add(allAnnotations.get(s).get(i));
+				}
+				index += modulo;
+			}
+		}
+		return new DocumentList(newText, newAnnotations);
+	}
+	
+	public static DocumentList merge(DocumentList a, DocumentList b){
+		List<String> newText = new ArrayList<String>();
+		Map<String, List<String>> newAnnotations = new TreeMap<String, List<String>>();
+		for(String s : a.allAnnotations().keySet()){
+			if(b.allAnnotations().containsKey(s)){
+				newAnnotations.put(s, new ArrayList<String>());
+			}
+		}
+		for(int i = 0; i < a.getSize(); i++){
+			newText.add(a.getPrintableTextAt(i));
+			for(String s : newAnnotations.keySet()){
+				newAnnotations.get(s).add(a.getAnnotationArray(s).get(i));
+			}
+		}
+		for(int i = 0; i < b.getSize(); i++){
+			newText.add(b.getPrintableTextAt(i));
+			for(String s : newAnnotations.keySet()){
+				newAnnotations.get(s).add(b.getAnnotationArray(s).get(i));
+			}
+		}
+		
+		return new DocumentList(newText, newAnnotations);
 	}
 	
 	public DocumentList(List<String> filenames, Map<String, List<String>> texts, Map<String, List<String>> annotations, String currentAnnot){
@@ -216,18 +247,15 @@ public class DocumentList implements Serializable
 	}
 
 	public DocumentList(Set<String> filenames){
-        CSVReader in;
+		CSVReader in;
         currentAnnotation = null;
         int totalLines = 0;
         String localName = "";
-//      List<TreeMap<String,List<String>>> annotationList = new ArrayList<TreeMap<String,List<String>>>();
         for(String filename : filenames){
                 int ending = filename.lastIndexOf(".csv");
                 localName += filename.substring(filename.lastIndexOf("/")+1, ending==-1?filename.length():ending) + " ";
                 ArrayList<Integer> blanks = new ArrayList<Integer>();
                 ArrayList<Integer> extras = new ArrayList<Integer>();
-//              TreeMap<String,List<String>> currentFileMap = new TreeMap<String,List<String>>();
-//              annotationList.add(currentFileMap);
                 int lineID = 0;
 
                 try{
@@ -699,5 +727,13 @@ public class DocumentList implements Serializable
 	{
 		this.emptyAnnotationString = emptyAnnotationString;
 	}
-
+	@Override
+	public DocumentList clone()
+	{
+		DocumentList newDocs = new DocumentList(new ArrayList(getFilenameList()), new TreeMap<String, List<String>>(getCoveredTextList()), new TreeMap<String, List<String>>(allAnnotations()), currentAnnotation);
+		newDocs.setName(getName());
+		newDocs.setLabelArray(labelArray);
+		newDocs.setDifferentiateTextColumns(differentiateTextColumns);
+		return newDocs;
+	}
 }

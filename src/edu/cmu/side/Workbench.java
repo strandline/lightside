@@ -15,12 +15,10 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
 import edu.cmu.side.control.GenesisControl;
 import edu.cmu.side.model.Recipe;
 import edu.cmu.side.model.RecipeManager;
-import edu.cmu.side.plugin.control.PluginManager;
 import edu.cmu.side.view.WorkbenchPanel;
 import edu.cmu.side.view.util.MemoryMonitorPanel;
 import edu.cmu.side.view.util.Refreshable;
@@ -38,7 +36,7 @@ public class Workbench{
 	public static File toolkitsFolder = new File(rootFolder, "toolkits");
 	public static File savedFolder = new File(BASE_PATH, "saved");
 
-	public static PluginManager pluginManager = new PluginManager(PLUGIN_FOLDER);
+//	public static PluginManager pluginManager = new PluginManager(PLUGIN_FOLDER);
 	public static RecipeManager recipeManager = new RecipeManager();
 	
 	static WorkbenchPanel panel;
@@ -47,23 +45,16 @@ public class Workbench{
 	static boolean serverMode = false;
 	static Image iconImage; 
 
-	public Workbench(){
+	public Workbench()
+	{
 
-		try {
+		try
+		{
+			// Set System L&F
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UnsupportedLookAndFeelException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
+		catch (Exception e)
+		{}
 		
 		JFrame frame = new JFrame();
 		frame.setIconImages(getIcons("toolkits/icons/bulbs/bulb_128.png", "toolkits/icons/bulbs/simple_32.png", "toolkits/icons/bulbs/simple_16.png")); //for windows?
@@ -81,7 +72,7 @@ public class Workbench{
 		//		pane = new GlassPane(frame.getContentPane());
 		//		frame.setGlassPane(pane);
 		frame.setSize(new Dimension(1024,768));
-		frame.setTitle("LightSIDE");
+		frame.setTitle("LightSide");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.pack();
 		frame.setVisible(true);
@@ -121,7 +112,6 @@ public class Workbench{
 			if(!listeners.isEmpty())
 			{
 				updateCount++;
-				long update = updateCount;
 				GenesisControl.setCurrentlyUpdating(source, true);
 //				System.out.println("Workbench.update begin update #"+update+" for source "+sourceName);
 				

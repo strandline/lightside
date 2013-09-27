@@ -2,8 +2,6 @@ package edu.cmu.side.control;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,7 +13,7 @@ import javax.swing.JTextField;
 import edu.cmu.side.Workbench;
 import edu.cmu.side.model.OrderedPluginMap;
 import edu.cmu.side.model.Recipe;
-import edu.cmu.side.model.RecipeManager;
+import edu.cmu.side.model.RecipeManager.Stage;
 import edu.cmu.side.model.StatusUpdater;
 import edu.cmu.side.model.data.FeatureTable;
 import edu.cmu.side.plugin.RestructurePlugin;
@@ -25,7 +23,6 @@ import edu.cmu.side.plugin.control.PluginManager;
 import edu.cmu.side.view.generic.ActionBar;
 import edu.cmu.side.view.generic.ActionBarTask;
 import edu.cmu.side.view.restructure.RestructureActionPanel;
-import edu.cmu.side.view.util.CheckBoxListEntry;
 import edu.cmu.side.view.util.Refreshable;
 import edu.cmu.side.view.util.SwingUpdaterLabel;
 
@@ -134,6 +131,17 @@ public class RestructureTablesControl extends GenesisControl{
 			plan = newRecipe;
 			name = n;
 		}
+		@Override
+		protected void finishTask()
+		{
+			super.finishTask();
+			
+			setHighlightedFilterTableRecipe(plan);
+			BuildModelControl.setHighlightedFeatureTableRecipe(plan);
+			Workbench.getRecipeManager().addRecipe(plan);
+			Workbench.update(Stage.MODIFIED_TABLE);;
+
+		}
 
 		@Override
 		protected void doTask()
@@ -144,14 +152,12 @@ public class RestructureTablesControl extends GenesisControl{
 				//TODO: use some sort of nested recipe
 				for (SIDEPlugin plug : plan.getFilters().keySet())
 				{
-					System.out.println("restructure plugin:"+plug.getClass().getSimpleName()+"\t<= "+current.getSize());
+//					System.out.println("restructure plugin:"+plug.getClass().getSimpleName()+"\t<= "+current.getSize());
 					current = ((RestructurePlugin) plug).restructure(current, plan.getFilters().get(plug), update);
-					System.out.println("restructure plugin:"+plug.getClass().getSimpleName()+"\t=> "+current.getSize());
+//					System.out.println("restructure plugin:"+plug.getClass().getSimpleName()+"\t=> "+current.getSize());
 				}
 				current.setName(name);
 				plan.setFilteredTable(current);
-				setHighlightedFilterTableRecipe(plan);
-				Workbench.getRecipeManager().addRecipe(plan);
 			}
 			catch (Exception e)
 			{

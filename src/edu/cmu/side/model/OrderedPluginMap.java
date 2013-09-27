@@ -16,12 +16,9 @@ import java.util.SortedMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import edu.cmu.side.Workbench;
 import edu.cmu.side.plugin.SIDEPlugin;
-import edu.cmu.side.plugin.control.PluginManager;
 
 public class OrderedPluginMap implements SortedMap<SIDEPlugin, Map<String, String>>, Serializable
 {
@@ -31,7 +28,7 @@ public class OrderedPluginMap implements SortedMap<SIDEPlugin, Map<String, Strin
 
 	public int getOrdering(Object s)
 	{
-		return ordering.indexOf((SIDEPlugin) s);
+		return ordering.indexOf(s);
 	}
 	
 	public boolean equals(OrderedPluginMap other){
@@ -116,7 +113,7 @@ public class OrderedPluginMap implements SortedMap<SIDEPlugin, Map<String, Strin
 	}
 
 	@Override
-	public Set<java.util.Map.Entry<SIDEPlugin, Map<String, String>>> entrySet()
+	public Set<Map.Entry<SIDEPlugin, Map<String, String>>> entrySet()
 	{
 		return configurations.entrySet();
 	}

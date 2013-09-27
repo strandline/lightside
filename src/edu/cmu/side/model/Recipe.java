@@ -9,31 +9,35 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.thoughtworks.xstream.annotations.XStreamConverter;
 
+import edu.cmu.side.model.RecipeManager.Stage;
 import edu.cmu.side.model.data.DocumentList;
 import edu.cmu.side.model.data.FeatureTable;
 import edu.cmu.side.model.data.PredictionResult;
 import edu.cmu.side.model.data.TrainingResult;
+import edu.cmu.side.model.feature.Feature.Type;
 import edu.cmu.side.plugin.FeaturePlugin;
 import edu.cmu.side.plugin.LearningPlugin;
 import edu.cmu.side.plugin.RestructurePlugin;
 import edu.cmu.side.plugin.SIDEPlugin;
 import edu.cmu.side.plugin.WrapperPlugin;
 
+/**
+ * A recipe stores the set of options that were chosen to get from an input file to whatever stage of machine learning you're currently at.
+ * All subsequent fields will remain blank; for instance, if this recipe describes a feature table then the learner will be null.
+ * 
+ * Within the researcher UI, everything that points to a data structure points to a recipe containing all of the
+ * steps that led to the creation of that feature table (in that case, a documentList, featureTable, and pluginmap of extractors.
+ * 
+ * @author emayfiel
+ *
+ */
 public class Recipe implements Serializable
 {
-
-	/**
-	 * 
-	 */
+	
 	private static final long serialVersionUID = 1L;
 	
 	RecipeManager.Stage stage = null;
@@ -90,8 +94,10 @@ public class Recipe implements Serializable
 
 	public void resetStage(){
 		stage = null;
+		stage = getStage();
 	}
 
+	@Override
 	public String toString()
 	{
 		String out = "";
@@ -113,7 +119,7 @@ public class Recipe implements Serializable
 		}
 		else
 		{
-			out = ""+stage;
+			out = getRecipeName();
 		}
 		if (out == null) out = stage.toString();
 		return out;
@@ -144,6 +150,11 @@ public class Recipe implements Serializable
 	
 	public LearningPlugin getLearner(){ return learner; }
 
+	
+	/**
+	 * Every time we add a new element to the recipe, we reset the stage that the recipe is at to reflect the new reality.
+	 * @param sdl
+	 */
 	public void setDocumentList(DocumentList sdl){
 		documentList = sdl;
 		resetStage();
@@ -213,7 +224,7 @@ public class Recipe implements Serializable
 		this.validationSettings = validationSettings;
 	}
 
-	private Recipe()
+	protected Recipe()
 	{
 		extractors = new OrderedPluginMap();
 		filters= new OrderedPluginMap();
@@ -272,6 +283,39 @@ public class Recipe implements Serializable
 	{
 		Recipe newRecipe = fetchRecipe();
 		
+		DocumentList dummyDocs = createDummyDocs(prior);
+		
+		newRecipe.setDocumentList(dummyDocs);
+		
+		for (SIDEPlugin plugin : prior.getExtractors().keySet())
+		{
+			newRecipe.addExtractor((FeaturePlugin) plugin, prior.getExtractors().get(plugin));
+		}
+		
+		FeatureTable dummyTable = prior.getTrainingTable().predictionClone(dummyDocs);
+		
+		newRecipe.setFeatureTable(dummyTable);
+		
+		for (SIDEPlugin plugin : prior.getFilters().keySet())
+		{
+			newRecipe.addFilter((RestructurePlugin) plugin, prior.getFilters().get(plugin));
+		}
+		
+		for (SIDEPlugin plugin : prior.getWrappers().keySet()){
+			newRecipe.addWrapper((WrapperPlugin) plugin, prior.getWrappers().get(plugin));
+		}
+		newRecipe.setLearner(prior.getLearner());
+		newRecipe.setLearnerSettings(prior.getLearnerSettings());
+		newRecipe.setValidationSettings(prior.getValidationSettings());
+		
+		newRecipe.recipeName = prior.getRecipeName()+" (prediction only)";
+		newRecipe.stage = Stage.PREDICTION_ONLY;
+		
+		return newRecipe;
+	}
+
+	protected static DocumentList createDummyDocs(Recipe prior)
+	{
 		Map<String, List<String>> textColumns = new HashMap<String, List<String>>();
 		Map<String, List<String>> columns = new HashMap<String, List<String>>();
 		DocumentList originalDocs = prior.getDocumentList();
@@ -288,33 +332,7 @@ public class Recipe implements Serializable
 		
 		DocumentList newDocs = new DocumentList(emptyList, textColumns, columns, prior.getFeatureTable().getAnnotation());
 		newDocs.setLabelArray(prior.getFeatureTable().getLabelArray());
-		
-		
-		newRecipe.setDocumentList(newDocs);
-		
-		for (SIDEPlugin plugin : prior.getExtractors().keySet())
-		{
-			newRecipe.addExtractor((FeaturePlugin) plugin, prior.getExtractors().get(plugin));
-		}
-		
-		FeatureTable dummyTable = prior.getTrainingTable().predictionClone();
-		
-		newRecipe.setFeatureTable(dummyTable);
-		
-		for (SIDEPlugin plugin : prior.getFilters().keySet())
-		{
-			newRecipe.addFilter((RestructurePlugin) plugin, prior.getFilters().get(plugin));
-		}
-		
-		for (SIDEPlugin plugin : prior.getWrappers().keySet()){
-			newRecipe.addWrapper((WrapperPlugin) plugin, prior.getWrappers().get(plugin));
-		}
-		newRecipe.setLearner(prior.getLearner());
-		newRecipe.setLearnerSettings(prior.getLearnerSettings());
-		newRecipe.setValidationSettings(prior.getValidationSettings());
-		newRecipe.setRecipeName(prior.getRecipeName());
-
-		return newRecipe;
+		return newDocs;
 	}
 	
 	public static Recipe copyEmptyRecipe(Recipe prior)
@@ -365,6 +383,29 @@ public class Recipe implements Serializable
 			newRecipe.addFilter(plugin, plugin.generateConfigurationSettings());
 		}
 	}
+	
+	public String getAnnotation(){
+		FeatureTable table = getTrainingTable();
+		return table==null?null:table.getAnnotation();
+	}
+	public Type getClassValueType(){
+		FeatureTable table = getTrainingTable();
+		return table==null?null:table.getClassValueType();		
+	}
+	
+	public String[] getLabelArray(){
+		FeatureTable table = getTrainingTable();
+		return table==null?null:table.getLabelArray();
+	}
+	public Set<String> getTextColumns(){
+		FeatureTable table = getTrainingTable();
+		if(table != null && table.getDocumentList() != null)
+			table.getDocumentList().getTextColumns();
+		if(getDocumentList() != null)
+			return getDocumentList().getTextColumns();
+		return null;
+	}
+
 
 	public String getRecipeName()
 	{
@@ -393,7 +434,7 @@ public class Recipe implements Serializable
 	
 	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException
 	{
-		System.out.println("reading "+this + " from "+in);
+		//System.out.println("reading "+this + " from "+in);
 		stage = (RecipeManager.Stage) in.readObject();
 		recipeName = (String) in.readObject();
 		extractors = (OrderedPluginMap) in.readObject();
@@ -411,7 +452,7 @@ public class Recipe implements Serializable
 
 	private void writeObject(ObjectOutputStream out) throws IOException
 	{
-		System.out.println("writing "+this + " to "+out);
+		//System.out.println("writing "+this + " to "+out);
 		out.writeObject(stage);
 		out.writeObject(recipeName);
 		out.writeObject(extractors);

@@ -15,13 +15,14 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
+import plugins.learning.WekaCore;
 import edu.cmu.side.Workbench;
 import edu.cmu.side.model.OrderedPluginMap;
 import edu.cmu.side.model.Recipe;
+import edu.cmu.side.model.RecipeManager.Stage;
 import edu.cmu.side.model.StatusUpdater;
 import edu.cmu.side.model.data.DocumentList;
 import edu.cmu.side.model.data.FeatureTable;
@@ -121,6 +122,8 @@ public class BuildModelControl extends GenesisControl{
 
 	public static Map<Integer, Integer> getFoldsMapRandom(DocumentList documents, int num){
 		Map<Integer, Integer> foldsMap = new TreeMap<Integer, Integer>();
+
+//		System.out.println("BMC 125: fold randomly using up to "+num+" folds for "+documents.getSize() + " documents");
 		for(int i = 0; i < documents.getSize(); i++){
 			foldsMap.put(i, i%num);
 		}
@@ -132,7 +135,7 @@ public class BuildModelControl extends GenesisControl{
 
 		int foldNum = 0;
 
-		System.out.println("BMC 131: fold by annotation using up to "+num+" folds");
+//		System.out.println("BMC 131: fold by annotation using up to "+num+" folds");
 		
 		Map<String, Integer> foldsByLabel = new TreeMap<String, Integer>();
 		List<String> annotationValues = documents.getAnnotationArray(annotation);
@@ -142,7 +145,7 @@ public class BuildModelControl extends GenesisControl{
 			if (!foldsByLabel.containsKey(annotationValue))
 			{
 				foldsByLabel.put(annotationValue, foldNum++);
-				System.out.println("BMC 141: "+annotationValue+" is assigned to fold #"+foldsByLabel.get(annotationValue) % num);
+//				System.out.println("BMC 141: "+annotationValue+" is assigned to fold #"+foldsByLabel.get(annotationValue) % num);
 			}
 			foldsMap.put(i, foldsByLabel.get(annotationValue) % num);
 		}
@@ -253,7 +256,7 @@ public class BuildModelControl extends GenesisControl{
 			ft = ((RestructurePlugin) plug).filterTestSet(originalTable, ft, recipe.getFilters().get(plug), updater);
 		}
 		
-		ft.reconcileFeatures(originalTable);
+		ft.reconcileFeatures(originalTable.getFeatureSet());
 		
 		return ft;
 
@@ -263,6 +266,7 @@ public class BuildModelControl extends GenesisControl{
 	{
 		Recipe plan;
 		String name;
+		Exception ex;
 
 
 		public BuildModelTask(ActionBar action, Recipe newRecipe, String n)
@@ -271,6 +275,40 @@ public class BuildModelControl extends GenesisControl{
 			plan = newRecipe;
 			name = n;
 
+		}
+		
+		@Override
+		protected void finishTask()
+		{
+			super.finishTask();
+			
+			if(ex != null)
+			{
+				Exception exception = ex;
+				ex = null;
+				if(exception.getMessage().equals("User Canceled"))
+					JOptionPane.showMessageDialog(null, "Model Training Canceled.", "Train Stop", JOptionPane.INFORMATION_MESSAGE);
+				
+				else
+					JOptionPane.showMessageDialog(null, "Model Training Failed.\n"+exception.getLocalizedMessage(), "Train Wreck", JOptionPane.ERROR_MESSAGE);
+			}
+			else if(plan != null)
+			{
+				BuildModelControl.setHighlightedTrainedModelRecipe(plan);
+				Workbench.getRecipeManager().addRecipe(plan);
+				ExploreResultsControl.setHighlightedTrainedModelRecipe(plan);
+				CompareModelsControl.setCompetingTrainedModelRecipe(plan);
+				PredictLabelsControl.setHighlightedTrainedModelRecipe(plan);
+				Workbench.update(Stage.TRAINED_MODEL);
+			}
+		}
+		
+		@Override
+		public void forceCancel()
+		{
+			ex = new RuntimeException("User Canceled");
+			plan = null;
+			super.forceCancel();
 		}
 
 		@Override
@@ -296,16 +334,15 @@ public class BuildModelControl extends GenesisControl{
 
 						plan.setLearnerSettings(plan.getLearner().generateConfigurationSettings());
 						plan.setValidationSettings(new TreeMap<String, Serializable>(validationSettings));
-						BuildModelControl.setHighlightedTrainedModelRecipe(plan);
-						Workbench.getRecipeManager().addRecipe(plan);
 					}
 				}
 			}
 			catch (Exception e)
 			{
 				e.printStackTrace();
+				plan = null;
+				ex = e;
 			}
-			finishTask();
 		}
 
 		@Override
@@ -377,7 +414,11 @@ public class BuildModelControl extends GenesisControl{
 
 	public static void prepareDocuments(DocumentList test) throws IllegalStateException
 	{
-		Recipe recipe = getHighlightedFeatureTableRecipe();
+		Recipe rec = getHighlightedFeatureTableRecipe();
+		prepareDocuments(rec, validationSettings, test);
+	}
+		
+	public static Map<String, Serializable> prepareDocuments(Recipe recipe, Map<String, Serializable> validation, DocumentList test) throws IllegalStateException{
 		DocumentList train = recipe.getDocumentList();
 
 		try
@@ -401,6 +442,7 @@ public class BuildModelControl extends GenesisControl{
 		{
 			throw new java.lang.IllegalStateException("Test set annotations do not match training set.\nMissing ["+recipe.getTrainingTable().getAnnotation()+"] or "+train.getTextColumns()+" columns.");
 		}
+		return validationSettings;
 
 
 	}

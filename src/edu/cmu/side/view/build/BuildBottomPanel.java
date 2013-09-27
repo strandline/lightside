@@ -36,7 +36,7 @@ public class BuildBottomPanel extends AbstractListPanel {
 
 		@Override
 		public void refreshPanel() {
-			refreshPanel(BuildModelControl.getTrainedModels());
+			refreshPanel(GenesisControl.getTrainedModels());
 		}
 	};
 
@@ -54,6 +54,7 @@ public class BuildBottomPanel extends AbstractListPanel {
 	};
 
 	private GenericModelMetricPanel result = new GenericModelMetricPanel(){
+		@Override
 		public void refreshPanel(){
 			refreshPanel(BuildModelControl.getHighlightedTrainedModelRecipe());
 		}
@@ -74,6 +75,12 @@ public class BuildBottomPanel extends AbstractListPanel {
 		control.setPreferredSize(new Dimension(275,200));		
 		confusion.setPreferredSize(new Dimension(275,200));
 		result.setPreferredSize(new Dimension(350, 200));
+		
+		Dimension minimumSize = new Dimension(50, 200);
+		control.setMinimumSize(minimumSize);
+		confusion.setMinimumSize(minimumSize);
+		result.setMinimumSize(minimumSize);
+		
 		add(BorderLayout.CENTER, pane);
 		
 		GenesisControl.addListenerToMap(RecipeManager.Stage.TRAINED_MODEL, control);
@@ -82,6 +89,7 @@ public class BuildBottomPanel extends AbstractListPanel {
 		
 	}
 
+	@Override
 	public void refreshPanel(){
 		control.refreshPanel();
 	}

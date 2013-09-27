@@ -1,16 +1,11 @@
 package edu.cmu.side.model.data;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 import java.util.TreeSet;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import plugins.features.BasicFeatures;
@@ -22,6 +17,8 @@ import edu.cmu.side.plugin.FeaturePlugin;
 import junit.framework.TestCase;
 
 public class FeatureTableTest extends TestCase{
+	private static final int NUM_GALLUP_INSTANCES = 942;
+	private static final int NUM_GALLUP_FEATURES = 338;
 	static StatusUpdater textUpdater = new StatusUpdater()
 	{
 
@@ -46,25 +43,26 @@ public class FeatureTableTest extends TestCase{
 
 		}
 	};
-	static String[] files = {"testData"+System.getProperty("file.separator")+"MovieReviews.csv"};
-	static String[] numericFiles = {"testData"+System.getProperty("file.separator")+"heuristicTest.csv"};
+	static String[] files = {"Gallup.csv"};
+//	static String[] numericFiles = {"heuristicTest.csv"};
 	static DocumentList docList;
-	static DocumentList numericDocList;
+//	static DocumentList numericDocList;
 	Boolean hasChanged = true;
 	static Boolean quiet = false;
 	static FeaturePlugin featureMaker = new BasicFeatures();
 	static Collection<FeatureHit> featureHits;
-	static Collection<FeatureHit> numericFeatureHits;
+//	static Collection<FeatureHit> numericFeatureHits;
 
 
+	@Override
 	public void setUp(){
 		if(hasChanged){
 			docList = new DocumentList(new HashSet<String>(Arrays.asList(files)));
 			docList.guessTextAndAnnotationColumns();
 			featureHits = featureMaker.extractFeatureHitsForSubclass(docList, textUpdater);
-			numericDocList = new DocumentList(new HashSet<String>(Arrays.asList(numericFiles)));
-			numericDocList.guessTextAndAnnotationColumns();
-			numericFeatureHits = featureMaker.extractFeatureHitsForSubclass(numericDocList, textUpdater);
+//			numericDocList = new DocumentList(new HashSet<String>(Arrays.asList(numericFiles)));
+//			numericDocList.guessTextAndAnnotationColumns();
+//			numericFeatureHits = featureMaker.extractFeatureHitsForSubclass(numericDocList, textUpdater);
 			hasChanged=false;
 			
 		}
@@ -75,14 +73,14 @@ public class FeatureTableTest extends TestCase{
 		int thresh = 5;
 		FeatureTable ft = new FeatureTable(docList, featureHits, thresh, annotation, Feature.Type.NOMINAL);
 		assertNotNull(ft);
-		assertEquals(ft.getSize(),300);
+		assertEquals(ft.getSize(),NUM_GALLUP_INSTANCES);
 	}
 	@Test
 	public void testFeatureTableConstructionNullAnnotation(){
 		int thresh = 5;
 		FeatureTable ft = new FeatureTable(docList, featureHits, thresh, null, Feature.Type.NOMINAL);
 		assertNotNull(ft);
-		assertEquals(ft.getSize(),300);
+		assertEquals(ft.getSize(),NUM_GALLUP_INSTANCES);
 	}
 	@Test
 	public void testFeatureTableConstructionNullType(){
@@ -90,7 +88,7 @@ public class FeatureTableTest extends TestCase{
 		String annotation = docList.currentAnnotation;
 		FeatureTable ft = new FeatureTable(docList, featureHits, thresh, annotation, null);
 		assertNotNull(ft);
-		assertEquals(ft.getSize(),300);
+		assertEquals(ft.getSize(),NUM_GALLUP_INSTANCES);
 	}
 	@Test
 	public void testFeatureTableConstructionBoolean(){
@@ -98,8 +96,9 @@ public class FeatureTableTest extends TestCase{
 		int thresh = 5;
 		FeatureTable ft = new FeatureTable(docList, featureHits, thresh, annotation, Feature.Type.BOOLEAN);
 		assertNotNull(ft);
-		assertEquals(ft.getSize(),300);
+		assertEquals(ft.getSize(),NUM_GALLUP_INSTANCES);
 	}
+	/*
 	@Test
 	public void testFeatureTableConstructionNumeric(){
 		String annotation = numericDocList.currentAnnotation;
@@ -137,19 +136,20 @@ public class FeatureTableTest extends TestCase{
 		}
 		assertEquals(ft.getNumericClassValues(" NEG").length-numberOfPOS, 150);
 	}
+	*/
 	@Test
 	public void testGetNominalClassValues(){
 		String annotation = docList.currentAnnotation;
 		int thresh = 5;
 		FeatureTable ft = new FeatureTable(docList, featureHits, thresh, annotation, Feature.Type.NOMINAL);
-		assertEquals(ft.getNominalClassValues().size(), 300);
+		assertEquals(ft.getNominalClassValues().size(), NUM_GALLUP_INSTANCES);
 	}
 	@Test
 	public void testGetSizeWithDocuments(){
 		String annotation = docList.currentAnnotation;
 		int thresh = 5;
 		FeatureTable ft = new FeatureTable(docList, featureHits, thresh, annotation, Feature.Type.NOMINAL);
-		assertEquals(ft.getSize(), 300);
+		assertEquals(ft.getSize(), NUM_GALLUP_INSTANCES);
 	}
 	@Test
 	public void testSetAndGetName(){
@@ -179,15 +179,15 @@ public class FeatureTableTest extends TestCase{
 		String annotation = docList.currentAnnotation;
 		int thresh = 5;
 		FeatureTable ft = new FeatureTable(docList, featureHits, thresh, annotation, Feature.Type.NOMINAL);
-		assertEquals(ft.getFeatureSet().size(), 3475);
+		assertEquals(ft.getFeatureSet().size(), NUM_GALLUP_FEATURES);
 	}
 	@Test
 	public void testGetSortedFeatures(){
 		String annotation = docList.currentAnnotation;
 		int thresh = 5;
 		FeatureTable ft = new FeatureTable(docList, featureHits, thresh, annotation, Feature.Type.NOMINAL);
-		assertEquals(ft.getSortedFeatures().size(), 3475);
-		assertEquals(((TreeSet<Feature>) ft.getSortedFeatures()).first().toString(),"--");
+		assertEquals(ft.getSortedFeatures().size(), NUM_GALLUP_FEATURES);
+		assertEquals(((TreeSet<Feature>) ft.getSortedFeatures()).first().toString(),"'ll");
 	}
 	@Test
 	public void testGetHitsForFeature(){
@@ -197,7 +197,8 @@ public class FeatureTableTest extends TestCase{
 		Iterator<Feature> iter = ft.getFeatureSet().iterator();
 		
 		Collection<FeatureHit> hitsForFeat = ft.getHitsForFeature(iter.next());
-		assertEquals(hitsForFeat.size(),91);
+		System.out.println(hitsForFeat.toString());
+		assertEquals(hitsForFeat.size(),6);
 	}
 	@Test
 	public void testGetHitsForDocument(){
@@ -205,7 +206,8 @@ public class FeatureTableTest extends TestCase{
 		int thresh = 5;
 		FeatureTable ft = new FeatureTable(docList, featureHits, thresh, annotation, Feature.Type.NOMINAL);
 		Collection<FeatureHit> features = ft.getHitsForDocument(0);
-		assertEquals(307, features.size());
+		System.out.println(features.size());
+		assertEquals(8, features.size());
 	}
 	
 	

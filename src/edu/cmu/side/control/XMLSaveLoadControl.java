@@ -59,7 +59,7 @@ public class XMLSaveLoadControl {
 			// StreamResult result = new StreamResult(System.out);
 
 			transformer.transform(source, result);
-		} catch (TransformerException | IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
 		}
