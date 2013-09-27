@@ -62,6 +62,7 @@ public class PredictionServer implements Container
 		System.out.println("Started server on port " + port + ".");
 	}
 
+	@Override
 	public void handle(final Request request, final Response response)
 	{
 		executor.execute(new Runnable()
@@ -295,7 +296,7 @@ public class PredictionServer implements Container
 				{
 					f.delete();
 					response.setCode(418);
-					return "could not attach model '" + path + "' -- was it trained on the latest version of LightSIDE?";
+					return "could not attach model '" + path + "' -- was it trained on the latest version of LightSide?";
 				}
 			}
 		}
@@ -366,7 +367,7 @@ public class PredictionServer implements Container
 				if (!attached)
 				{
 					response.setCode(418);
-					return "could not load existing model for '" + model + "' -- was it trained on the latest version of LightSIDE?";
+					return "could not load existing model for '" + model + "' -- was it trained on the latest version of LightSide?";
 				}
 			}
 			else

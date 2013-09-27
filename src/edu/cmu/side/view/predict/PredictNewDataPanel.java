@@ -2,8 +2,6 @@ package edu.cmu.side.view.predict;
 
 import java.util.Collections;
 
-import javax.swing.JScrollPane;
-
 import edu.cmu.side.Workbench;
 import edu.cmu.side.control.GenesisControl;
 import edu.cmu.side.control.PredictLabelsControl;
@@ -12,26 +10,28 @@ import edu.cmu.side.model.RecipeManager;
 import edu.cmu.side.model.RecipeManager.Stage;
 import edu.cmu.side.model.data.DocumentList;
 import edu.cmu.side.view.generic.GenericLoadCSVPanel;
-import edu.cmu.side.view.util.SelectPluginList;
 
 public class PredictNewDataPanel extends GenericLoadCSVPanel
 {
-
-	SelectPluginList textColumnsList = new SelectPluginList();
-	JScrollPane textColumnsScroll = new JScrollPane(textColumnsList);
+//
+//	SelectPluginList textColumnsList = new SelectPluginList();
+//	JScrollPane textColumnsScroll = new JScrollPane(textColumnsList);
 
 	public PredictNewDataPanel()
 	{
-		super("Unlabeled Data (CSV):");
+		super("Unlabeled Data (CSV):", true, true, false, true);
 		GenesisControl.addListenerToMap(RecipeManager.Stage.TRAINED_MODEL, this);
 	}
 
 	@Override
 	public void setHighlight(Recipe r)
 	{
-		PredictLabelsControl.setHighlightedUnlabeledData(r);
-		Workbench.update(this);
-		verifyNewData();
+		//if(this.isEnabled())
+		{
+			PredictLabelsControl.setHighlightedUnlabeledData(r);
+			Workbench.update(this);
+			verifyNewData();
+		}
 	}
 
 	@Override
@@ -44,6 +44,7 @@ public class PredictNewDataPanel extends GenericLoadCSVPanel
 	public void refreshPanel()
 	{
 		refreshPanel(Workbench.getRecipesByPane(Stage.DOCUMENT_LIST));
+		setEnabled(isEnabled());
 	}
 
 	@Override
@@ -75,4 +76,5 @@ public class PredictNewDataPanel extends GenericLoadCSVPanel
 			clearWarning();
 		}
 	}
+
 }

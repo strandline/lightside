@@ -19,30 +19,33 @@ import com.yerihyo.yeritools.io.FileToolkit;
 import com.yerihyo.yeritools.text.StringToolkit;
 import com.yerihyo.yeritools.xml.XMLToolkit;
 
-import edu.cmu.side.Workbench;
 import edu.cmu.side.plugin.SIDEPlugin;
 
 public class PluginManager {
 	
-	private static ListValueMap<String,PluginWrapper> pluginTypeMap = new ListValueMap<String,PluginWrapper>();
+	private static PluginManager pluginManager;
+	private ListValueMap<String,PluginWrapper> pluginTypeMap = new ListValueMap<String,PluginWrapper>();
 	private String errorMessage;
+	private File pluginFile;
 	
-
-	public ListValueMap<String,PluginWrapper> getPluginTypeMap(){ return pluginTypeMap; }
+	public ListValueMap<String,PluginWrapper> getPluginTypeMap()
+	{
+		return pluginTypeMap; 
+	}
 	
 	public Collection<PluginWrapper> getAllPlugins() {
-		return pluginTypeMap.valueElements();
+		return getPluginTypeMap().valueElements();
 	}
 	public Set<String> getPluginTypes()
 	{
-		return pluginTypeMap.keySet();
+		return  getPluginTypeMap().keySet();
 	}
 
 	public PluginWrapper getPluginWrapperByPluginClassName(String pluginClassName) {
 		PluginWrapper result = null;
 
 		for (Iterator<PluginWrapper> iTemp = getAllPlugins().iterator(); iTemp.hasNext();) {
-			PluginWrapper pTemp = (PluginWrapper) iTemp.next();
+			PluginWrapper pTemp = iTemp.next();
 			if (pTemp.getConfigMap().get(PluginWrapper.CLASSNAME).equalsIgnoreCase(pluginClassName)) {
 				result = pTemp;
 				break;
@@ -62,9 +65,9 @@ public class PluginManager {
 	public List<PluginWrapper> getPluginWrapperCollectionByType(String type){
 		List<PluginWrapper> pluginWrapperList = new ArrayList<PluginWrapper>();
 		
-		for(String key : pluginTypeMap.keySet()){
+		for(String key :  getPluginTypeMap().keySet()){
 			if(!key.startsWith(type)){ continue; }
-			pluginWrapperList.addAll(pluginTypeMap.get(key));
+			pluginWrapperList.addAll( getPluginTypeMap().get(key));
 		}
 		return pluginWrapperList;
 	}
@@ -73,7 +76,7 @@ public class PluginManager {
 	{
 		List<SIDEPlugin> sidePluginList = new ArrayList<SIDEPlugin>();
 		
-		Collection<PluginWrapper> pluginWrapperCollection = pluginTypeMap.get(type);
+		Collection<PluginWrapper> pluginWrapperCollection =  getSharedPluginManager().getPluginTypeMap().get(type);
 		for(PluginWrapper pluginWrapper : pluginWrapperCollection){
 			SIDEPlugin sidePlugin = pluginWrapper.getSIDEPlugin();
 			sidePluginList.add(sidePlugin);
@@ -82,9 +85,10 @@ public class PluginManager {
 	}
 
 	public void addPluginWrapper(PluginWrapper pluginWrapper) {
-		pluginTypeMap.add(pluginWrapper.getType(), pluginWrapper);
+		 getPluginTypeMap().add(pluginWrapper.getType(), pluginWrapper);
 	}
 
+	@Override
 	public String toString() {
 		return "PluginWrapper Manager";
 	}
@@ -144,26 +148,41 @@ public class PluginManager {
 		return pluginTypeMap;
 	}
 	
-	public PluginManager(File rootFolder) {
+	
+	
+	//the only pluginManager anyone cares about is the one instantiated by Workbench.
+	private PluginManager(File rootFolder) {
 		// Traverse the directory, building a PluginCollection for each folder
 		// that we find
-		try{
-			YeriDebug.ASSERT(rootFolder.isDirectory());
-		} catch(RuntimeException re){
-			System.err.println(rootFolder.toString());
-		}
+		if(!rootFolder.isDirectory())
+			throw new IllegalArgumentException("Plugin folder '"+rootFolder.toString() + "' is not a directory.");
 		
+		pluginFile = rootFolder;
+
+		//initialize static pluginTypeMap.
 		StringBuilder errorStringBuilder = new StringBuilder();
-		PluginManager.pluginTypeMap = createPluginTypeMap(rootFolder, errorStringBuilder);
+		pluginTypeMap = createPluginTypeMap(rootFolder, errorStringBuilder);
 		errorMessage = errorStringBuilder.toString();
+		
 	}
 
 	public String getErrorMessage() {
 		return errorMessage;
 	}
 	
+	public static PluginManager getSharedPluginManager()
+	{
+		File rootFolder = new File("plugins");
+		if(pluginManager == null)
+		{
+			pluginManager = new PluginManager(rootFolder); //TODO: maybe make this more flexible.
+
+		}
+		return pluginManager;
+	}
+	
 	public static SIDEPlugin getPluginByClassname(String classname)
 	{
-		 return Workbench.pluginManager.getPluginWrapperByPluginClassName(classname).getSIDEPlugin();
+		 return getSharedPluginManager().getPluginWrapperByPluginClassName(classname).getSIDEPlugin();
 	}
 }

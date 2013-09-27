@@ -20,7 +20,6 @@ import edu.cmu.side.view.generic.GenericFeatureMetricPanel;
 import edu.cmu.side.view.generic.GenericLoadPanel;
 import edu.cmu.side.view.generic.GenericMetricChecklistPanel;
 import edu.cmu.side.view.util.AbstractListPanel;
-import edu.cmu.side.view.util.RecipeExporter;
 
 public class ExtractBottomPanel extends AbstractListPanel{
 
@@ -36,7 +35,7 @@ public class ExtractBottomPanel extends AbstractListPanel{
 
 		@Override
 		public void refreshPanel() {
-			refreshPanel(ExtractFeaturesControl.getFeatureTables());
+			refreshPanel(GenesisControl.getFeatureTables());
 		}
 
 		@Override
@@ -68,8 +67,7 @@ public class ExtractBottomPanel extends AbstractListPanel{
 			{
 				if (ExtractFeaturesControl.hasHighlightedFeatureTable())
 				{
-					FeatureTable table = ExtractFeaturesControl.getHighlightedFeatureTableRecipe().getFeatureTable();
-					refreshPanel(table);
+					refreshPanel(ExtractFeaturesControl.getHighlightedFeatureTableRecipe());
 				}
 				else
 				{
@@ -108,20 +106,32 @@ public class ExtractBottomPanel extends AbstractListPanel{
 				}
 			}
 		};
-		setLayout(new BorderLayout());
-		JSplitPane split = new JSplitPane();
-		split.setLeftComponent(control);
-		split.setBorder(BorderFactory.createEmptyBorder());
+		
+		JSplitPane bigSplit = new JSplitPane();
+		bigSplit.setLeftComponent(control);
+		
 		JSplitPane displaySplit = new JSplitPane();
 		displaySplit.setLeftComponent(checklist);
 		displaySplit.setRightComponent(display);
+		
+		bigSplit.setRightComponent(displaySplit);
+		
+		bigSplit.setBorder(BorderFactory.createEmptyBorder());
 		displaySplit.setBorder(BorderFactory.createEmptyBorder());
-		displaySplit.setPreferredSize(new Dimension(650,200));
-		checklist.setPreferredSize(new Dimension(275,200));
-		display.setPreferredSize(new Dimension(350, 200));
-		split.setRightComponent(displaySplit);
+		display.setBorder(BorderFactory.createEmptyBorder());
+
 		control.setPreferredSize(new Dimension(275,200));
-		add(BorderLayout.CENTER, split);
+		displaySplit.setPreferredSize(new Dimension(650,200));
+		checklist.setPreferredSize(new Dimension(300,200));
+		display.setPreferredSize(new Dimension(325, 200));
+
+		Dimension minimumSize = new Dimension(50, 200);
+		control.setMinimumSize(minimumSize);
+		checklist.setMinimumSize(minimumSize);
+		display.setMinimumSize(minimumSize);
+		
+		setLayout(new BorderLayout());
+		add(BorderLayout.CENTER, bigSplit);
 
 		GenesisControl.addListenerToMap(RecipeManager.Stage.FEATURE_TABLE, control);
 		GenesisControl.addListenerToMap(RecipeManager.Stage.FEATURE_TABLE, checklist);
@@ -131,7 +141,9 @@ public class ExtractBottomPanel extends AbstractListPanel{
 		GenesisControl.addListenerToMap(checklist, display);
 	}
 
-	public void refreshPanel(){
+	@Override
+	public void refreshPanel()
+	{
 		control.refreshPanel();
 	}
 }

@@ -10,8 +10,6 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import edu.cmu.side.Workbench;
-import edu.cmu.side.control.ExtractFeaturesControl;
-import edu.cmu.side.model.Recipe;
 import edu.cmu.side.model.RecipeManager.Stage;
 
 public abstract class GenericLoadCSVPanel extends GenericLoadPanel
@@ -19,10 +17,10 @@ public abstract class GenericLoadCSVPanel extends GenericLoadPanel
 	public GenericLoadCSVPanel(String title)
 	{
 		super(title);
-		configureLoadCSVPanel();
+		configureLoadCSVPanel(true, true, false, true);
 	}
 
-	protected void configureLoadCSVPanel()
+	protected void configureLoadCSVPanel(boolean showLoad, boolean showDelete, boolean showSave, boolean showDescription)
 	{
 		try
 		{
@@ -35,7 +33,8 @@ public abstract class GenericLoadCSVPanel extends GenericLoadPanel
 			buttons.add("right", warn);
 			buttons.add("right", bonus);
 			buttons.add("right", new JPanel());
-			buttons.add("right", load);
+			if(showLoad)
+				buttons.add("right", load);
 			
 			bonus.addActionListener(new ActionListener()
 			{
@@ -52,7 +51,9 @@ public abstract class GenericLoadCSVPanel extends GenericLoadPanel
 			//no worries.
 		}
 		
-		this.remove(save);
+		if(!showSave)
+			this.remove(save);
+		
 		ImageIcon iconLoad = new ImageIcon("toolkits/icons/folder_page.png");
 		load.setIcon(iconLoad);
 		
@@ -61,7 +62,7 @@ public abstract class GenericLoadCSVPanel extends GenericLoadPanel
 	public GenericLoadCSVPanel(String title, boolean showLoad, boolean showDelete, boolean showSave, boolean showDescription)
 	{
 		super(title, showLoad, showDelete, showSave, showDescription);
-		configureLoadCSVPanel();
+		configureLoadCSVPanel(showLoad, showDelete, showSave, showDescription);
 	}
 
 	@Override

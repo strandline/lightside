@@ -123,7 +123,7 @@ public abstract class GenericFeatureMetricPanel extends AbstractListPanel {
 //			}
 //		}
 		FeatureTable newTable = (recipe == null ? null : recipe.getTrainingTable());
-//		if(!isEvaluating() )//&& localTable != newTable)
+		if(!isEvaluating() )//&& localTable != newTable)
 		{
 			localTable = newTable;
 			EvaluateFeaturesTask task = new EvaluateFeaturesTask(getActionBar(), recipe, tableEvaluationPlugins, mask, getTargetAnnotation());
@@ -218,10 +218,10 @@ public abstract class GenericFeatureMetricPanel extends AbstractListPanel {
 		@Override
 		protected void beginTask()
 		{
-//			System.out.println("GFMC 181: begin eval task");
-			super.beginTask();
-			GenericFeatureMetricPanel.setEvaluating(true);
-			combo.setEnabled(false);
+//				System.out.println("GFMC 181: begin eval task");
+				GenericFeatureMetricPanel.setEvaluating(true);
+				combo.setEnabled(false);
+				super.beginTask();
 		}
 		
 		@Override
@@ -352,6 +352,7 @@ public abstract class GenericFeatureMetricPanel extends AbstractListPanel {
 			}
 			catch (Exception e)
 			{
+				System.err.println("Generic Feature Metric Panel: Error while updating metrics.");
 				e.printStackTrace();
 			}
 		}

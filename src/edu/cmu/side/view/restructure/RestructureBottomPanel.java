@@ -33,7 +33,7 @@ public class RestructureBottomPanel extends AbstractListPanel{
 		
 		@Override
 		public void refreshPanel() {
-			refreshPanel(RestructureTablesControl.getFilterTables());
+			refreshPanel(GenesisControl.getFilterTables());
 		}
 		
 		@Override
@@ -65,8 +65,8 @@ public class RestructureBottomPanel extends AbstractListPanel{
 			@Override
 			public void refreshPanel(){
 				if(RestructureTablesControl.hasHighlightedFilterTable()){
-					FeatureTable table = RestructureTablesControl.getHighlightedFilterTableRecipe().getFilteredTable();
-					refreshPanel(table);
+					
+					refreshPanel(RestructureTablesControl.getHighlightedFilterTableRecipe());
 				}else{
 					refreshPanel(null);
 				}
@@ -96,7 +96,6 @@ public class RestructureBottomPanel extends AbstractListPanel{
 				}
 			}
 		};
-		setLayout(new BorderLayout());
 		JSplitPane pane = new JSplitPane();
 		pane.setLeftComponent(control);
 
@@ -111,6 +110,12 @@ public class RestructureBottomPanel extends AbstractListPanel{
 		checklist.setPreferredSize(new Dimension(275,200));
 		display.setPreferredSize(new Dimension(350, 200));
 
+		Dimension minimumSize = new Dimension(50, 200);
+		control.setMinimumSize(minimumSize);
+		checklist.setMinimumSize(minimumSize);
+		display.setMinimumSize(minimumSize);
+
+		setLayout(new BorderLayout());
 		add(BorderLayout.CENTER, pane);
 
 		GenesisControl.addListenerToMap(RecipeManager.Stage.MODIFIED_TABLE, control);
@@ -119,6 +124,7 @@ public class RestructureBottomPanel extends AbstractListPanel{
 		GenesisControl.addListenerToMap(checklist, display);
 	}
 	
+	@Override
 	public void refreshPanel(){
 		control.refreshPanel();
 	}

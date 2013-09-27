@@ -50,8 +50,8 @@ public class BuildModelPane extends JPanel{
 			@Override
 			public void refreshPanel() {
 				Collection<Recipe> recipes = new ArrayList<Recipe>();
-				recipes.addAll(BuildModelControl.getFeatureTables());
-				recipes.addAll(BuildModelControl.getFilterTables());
+				recipes.addAll(GenesisControl.getFilterTables());
+				recipes.addAll(GenesisControl.getFeatureTables());
 				refreshPanel(recipes);
 			}
 		};
@@ -77,9 +77,12 @@ public class BuildModelPane extends JPanel{
 		GenesisControl.addListenerToMap(RecipeManager.Stage.FEATURE_TABLE, config);
 		GenesisControl.addListenerToMap(RecipeManager.Stage.MODIFIED_TABLE, config);
 
-		GenesisControl.addListenerToMap(load, config);
 		GenesisControl.addListenerToMap(load, checklist);
+		GenesisControl.addListenerToMap(load, action);
+		GenesisControl.addListenerToMap(load, config);
 		GenesisControl.addListenerToMap(checklist, config);
+		GenesisControl.addListenerToMap(checklist, action);
+		GenesisControl.addListenerToMap(config, action);
 		
 		for(WrapperPlugin plug : BuildModelControl.getWrapperPlugins().keySet())
 		{

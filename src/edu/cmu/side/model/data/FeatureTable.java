@@ -2,16 +2,19 @@ package edu.cmu.side.model.data;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -19,7 +22,6 @@ import org.w3c.dom.Element;
 import com.thoughtworks.xstream.XStream;
 
 import edu.cmu.side.model.feature.Feature;
-import edu.cmu.side.model.feature.Feature.Type;
 import edu.cmu.side.model.feature.FeatureHit;
 import edu.cmu.side.model.feature.LocalFeatureHit;
 import edu.cmu.side.model.feature.LocalFeatureHit.HitLocation;
@@ -54,6 +56,7 @@ public class FeatureTable implements Serializable
 		this.hitsPerFeature = new TreeMap<Feature, Collection<FeatureHit>>(); //Rough guess at capacity requirement.
 		this.hitsPerDocument  = new ArrayList<Collection<FeatureHit>>();
 	}
+
 	public FeatureTable(String name, int thresh, String currentAnnotation, Feature.Type type, String[] labelArray,
 			ArrayList<Feature> featureList, List<String> nomCV, Map<String, double[]>numCV){
 		this.name=name;
@@ -65,7 +68,6 @@ public class FeatureTable implements Serializable
 		this.numericConvertedClassValues = numCV;
 		this.hitsPerFeature = new TreeMap<Feature, Collection<FeatureHit>>();
 		Collection<FeatureHit> emptyHits = new ArrayList<FeatureHit>(0);
-
 		for(Feature f : featureList)
 		{
 			this.hitsPerFeature.put(f, emptyHits);
@@ -76,6 +78,8 @@ public class FeatureTable implements Serializable
 			this.hitsPerDocument.add(emptyHits);
 		}
 	}
+
+	
 	public FeatureTable(DocumentList sdl, Collection<FeatureHit> hits, int thresh, String annotation, Feature.Type type)
 	{
 		this();
@@ -83,76 +87,54 @@ public class FeatureTable implements Serializable
 		if(sdl==null) docExists=false;
 		setAnnotation(annotation);
 		this.type = type;
-
 		Map<Feature, Set<Integer>> localFeatures = new HashMap<Feature, Set<Integer>>(100000);
 		this.threshold = thresh;
 		this.documents = sdl;
+		long hitCount = 0;
 
 		generateConvertedClassValues();
 
-		//		System.out.println("FT 74: " + hits.size() + "total incoming hits");
+		System.out.println("FT 65: " + hits.size() + " total incoming hits, "+sdl.getSize()+ " instances");
 
 		for (int i = 0; i < sdl.getSize(); i++)
 		{
 			hitsPerDocument.add(new TreeSet<FeatureHit>());
 		}
-		for (FeatureHit hit : hits)
+		Iterator<FeatureHit> hiterator = hits.iterator();
+		while(hiterator.hasNext())
 		{
+			FeatureHit hit = hiterator.next();
 			Feature f = hit.getFeature();
-			if (!localFeatures.containsKey(f))
+			if (!hitsPerFeature.containsKey(f))
 			{
-				localFeatures.put(f, new TreeSet<Integer>());
+				hitsPerFeature.put(f, new TreeSet<FeatureHit>());
 			}
-			localFeatures.get(f).add(hit.getDocumentIndex());
+			hitsPerFeature.get(f).add(hit);
+			hiterator.remove(); //TODO: does emptying the hitlist while populating the table actually make a practical memory difference?
 		}
+		System.out.println("All features added to table. Thresholding...");
 
-		for (FeatureHit hit : hits)
+		Iterator<Entry<Feature, Collection<FeatureHit>>> fiterator = hitsPerFeature.entrySet().iterator();
+		
+		while(fiterator.hasNext())
 		{
-			if (localFeatures.get(hit.getFeature()).size() >= threshold)
+			Entry<Feature, Collection<FeatureHit>> entry = fiterator.next();
+			
+			int numHitsForThisFeature = hitsPerFeature.get(entry.getKey()).size();
+			if(numHitsForThisFeature >= threshold)
 			{
-				hitsPerDocument.get(hit.getDocumentIndex()).add(hit);
-				if (!hitsPerFeature.containsKey(hit.getFeature()))
+				hitCount += numHitsForThisFeature;
+				for(FeatureHit hit : entry.getValue())
 				{
-					hitsPerFeature.put(hit.getFeature(), new TreeSet<FeatureHit>());
+					hitsPerDocument.get(hit.getDocumentIndex()).add(hit);
 				}
-				hitsPerFeature.get(hit.getFeature()).add(hit);
+			}
+			else
+			{
+				fiterator.remove();
 			}
 		}
-
-		//		System.out.println("FT 74: "+hitsPerDocument.get(0).size()+" thresholded hits for doc 0");
 	}
-
-	//	@Deprecated
-	//	public FeatureTable(DocumentList sdl, Collection<FeatureHit> hits, int thresh){
-	//		this();
-	//		Map<Feature, Set<Integer>> localFeatures = new HashMap<Feature, Set<Integer>>(100000);
-	//		this.threshold = thresh;
-	//		this.documents = sdl;
-	//		this.annotation = sdl.getCurrentAnnotation();
-	//		this.type = sdl.getValueType(annotation);
-	//		generateConvertedClassValues();
-	//		
-	//		for(int i = 0; i < sdl.getSize(); i++){
-	//			hitsPerDocument.add(new TreeSet<FeatureHit>());
-	//		}
-	//		for(FeatureHit hit : hits){
-	//			Feature f = hit.getFeature();
-	//			if(!localFeatures.containsKey(f)){
-	//				localFeatures.put(f, new TreeSet<Integer>());
-	//			}
-	//			localFeatures.get(f).add(hit.getDocumentIndex());
-	//		}
-	//
-	//		for(FeatureHit hit : hits){
-	//			if(localFeatures.get(hit.getFeature()).size() >= threshold){
-	//				hitsPerDocument.get(hit.getDocumentIndex()).add(hit);
-	//				if(!hitsPerFeature.containsKey(hit.getFeature())){
-	//					hitsPerFeature.put(hit.getFeature(), new TreeSet<FeatureHit>());
-	//				}
-	//				hitsPerFeature.get(hit.getFeature()).add(hit);
-	//			}
-	//		}
-	//	}
 
 
 	public FeatureTable cloneTrainingFold(Map<Integer, Integer> foldMap, int fold, boolean train){
@@ -349,6 +331,7 @@ public class FeatureTable implements Serializable
 		}
 	}
 
+	@Override
 	public FeatureTable clone()
 	{
 		FeatureTable ft = new FeatureTable();
@@ -540,7 +523,47 @@ public class FeatureTable implements Serializable
 		}
 	}
 
-	public void reconcileFeatures(FeatureTable train)
+//	public void reconcileFeatures(FeatureTable train)
+//	{
+//		//TODO: decide if this removal step is neccessary - it may be un-needful, but could save space.
+//		Collection<Feature> toRemove = new ArrayList<Feature>();
+//
+////		System.out.println("FT 480: Unreconciled feature table has "+this.getFeatureSet().size() + " features, vs. "+train.getFeatureSet().size()+" in target");
+//		
+//		for(Feature f : this.hitsPerFeature.keySet())
+//		{
+//			if(!train.hitsPerFeature.containsKey(f))
+//			{
+//				Collection<FeatureHit> hits = this.hitsPerFeature.get(f);
+//				toRemove.add(f);
+//				
+//				for(FeatureHit h : hits)
+//				{
+//					hitsPerDocument.get(h.getDocumentIndex()).remove(h);
+//				}
+//			}
+//		}
+//		for(Feature f : toRemove)
+//		{
+//			this.hitsPerFeature.remove(f);
+//		}
+////		System.out.println("FT 487: removed "+toRemove.size() + " features. "+this.getFeatureSet().size() + " features remain.");
+//		
+//		
+//		//add empty feature map entries so all training features are accounted for in this new feature table.
+//		for(Feature f : train.hitsPerFeature.keySet())
+//		{
+//			if(!this.hitsPerFeature.containsKey(f))
+//			{
+//				this.hitsPerFeature.put(f, new ArrayList<FeatureHit>());
+//			}
+//		}
+//		
+////		System.out.println("FT 511: Reconciled table has "+this.getFeatureSet().size() + " features");
+//		
+//	}
+	
+	public void reconcileFeatures(Set<Feature> guaranteedFeatures)
 	{
 		//TODO: decide if this removal step is neccessary - it may be un-needful, but could save space.
 		Collection<Feature> toRemove = new ArrayList<Feature>();
@@ -549,7 +572,7 @@ public class FeatureTable implements Serializable
 
 		for(Feature f : this.hitsPerFeature.keySet())
 		{
-			if(!train.hitsPerFeature.containsKey(f))
+			if(!guaranteedFeatures.contains(f))
 			{
 				Collection<FeatureHit> hits = this.hitsPerFeature.get(f);
 				toRemove.add(f);
@@ -568,7 +591,7 @@ public class FeatureTable implements Serializable
 
 
 		//add empty feature map entries so all training features are accounted for in this new feature table.
-		for(Feature f : train.hitsPerFeature.keySet())
+		for(Feature f : guaranteedFeatures)
 		{
 			if(!this.hitsPerFeature.containsKey(f))
 			{
@@ -614,12 +637,17 @@ public class FeatureTable implements Serializable
 		this.type = type;
 	}
 
-	public FeatureTable predictionClone()
+	/**
+	 * Produces a feature-table suitable only for prediction, not analysis. 
+	 * @param dummyDocs might be null. If not null, pass in a proxy for the original DocumentList.
+	 * @return
+	 */
+	public FeatureTable predictionClone(DocumentList dummyDocs)
 	{
 		FeatureTable ft = new FeatureTable();
 		ft.setName(getName()+" (prediction clone)");
 
-		//	    ft.documents = documents;
+	    ft.documents = dummyDocs;
 		ft.type = type;
 		//Why two threshold assignments
 		ft.threshold = threshold;
@@ -647,32 +675,45 @@ public class FeatureTable implements Serializable
 		return ft;
 	}
 
-	public boolean equals(FeatureTable other){
-		boolean returnStatement = true;
-		if(this.documents!=null){
-			returnStatement=this.documents.equals(other.getDocumentList())?returnStatement:false;
-		} else {
-			returnStatement=other.getDocumentList()==null?returnStatement:false;
-		}
-
-		returnStatement=this.threshold.equals(other.threshold)?returnStatement:false;
-		returnStatement=this.getAnnotation().equals(other.getAnnotation())?returnStatement:false;
-		returnStatement=this.getClassValueType().equals(other.getClassValueType())?returnStatement:false;
-		if(this.getFeatureSet().equals(other.getFeatureSet())){
-			for(Feature feat: this.getFeatureSet()){
-				returnStatement=this.getHitsForFeature(feat).equals(other.getHitsForFeature(feat))?returnStatement:false;
+	public boolean isWeighted()
+	{
+		Pattern p = Pattern.compile("\\D*(\\d+)\\D*");
+		for(String s : getLabelArray())
+		{
+			Matcher m = p.matcher(s);
+			if(!m.matches())
+			{
+				return false;
 			}
-		} else {
-			returnStatement=false;
 		}
-		if(this.getDocumentList().equals(other.getDocumentList())){
-			for(int i = 0; i< this.hitsPerDocument.size(); i++){
-				returnStatement=this.getHitsForDocument(i).equals(other.getHitsForDocument(i))?returnStatement:false;
-			}
-		} else {
-			returnStatement=false;
-		}
-		return returnStatement;
+		return true;
 	}
+	
+    public boolean equals(FeatureTable other){
+        boolean returnStatement = true;
+        if(this.documents!=null){
+                returnStatement=this.documents.equals(other.getDocumentList())?returnStatement:false;
+        } else {
+                returnStatement=other.getDocumentList()==null?returnStatement:false;
+        }
 
+        returnStatement=this.threshold.equals(other.threshold)?returnStatement:false;
+        returnStatement=this.getAnnotation().equals(other.getAnnotation())?returnStatement:false;
+        returnStatement=this.getClassValueType().equals(other.getClassValueType())?returnStatement:false;
+        if(this.getFeatureSet().equals(other.getFeatureSet())){
+                for(Feature feat: this.getFeatureSet()){
+                        returnStatement=this.getHitsForFeature(feat).equals(other.getHitsForFeature(feat))?returnStatement:false;
+                }
+        } else {
+                returnStatement=false;
+        }
+        if(this.getDocumentList().equals(other.getDocumentList())){
+                for(int i = 0; i< this.hitsPerDocument.size(); i++){
+                        returnStatement=this.getHitsForDocument(i).equals(other.getHitsForDocument(i))?returnStatement:false;
+                }
+        } else {
+                returnStatement=false;
+        }
+        return returnStatement;
+}
 }

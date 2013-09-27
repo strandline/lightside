@@ -2,15 +2,13 @@ package edu.cmu.side.view.generic;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.FileNotFoundException;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.TreeSet;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -29,6 +27,7 @@ import edu.cmu.side.control.GenesisControl;
 import edu.cmu.side.model.Recipe;
 import edu.cmu.side.model.RecipeManager.Stage;
 import edu.cmu.side.model.data.DocumentList;
+import edu.cmu.side.plugin.control.ImportController;
 import edu.cmu.side.recipe.converters.ConverterControl;
 import edu.cmu.side.view.util.AbstractListPanel;
 import edu.cmu.side.view.util.RecipeExporter;
@@ -45,8 +44,9 @@ public abstract class GenericLoadPanel extends AbstractListPanel
 
 	public static FileNameExtensionFilter csvFilter = new FileNameExtensionFilter("CSV", "csv", "CSV");
 	public static FileNameExtensionFilter arffFilter = new FileNameExtensionFilter("ARFF (Weka)", "arff");
-	public static FileNameExtensionFilter sideFilter = new FileNameExtensionFilter("LightSIDE", "side", "model.side");
-	public static FileNameExtensionFilter trainedFilter = new FileNameExtensionFilter("Predict-Only", "side", "predict.side");
+	public static FileNameExtensionFilter sideFilter = new FileNameExtensionFilter("LightSide", "side");
+	public static FileNameExtensionFilter modelFilter = new FileNameExtensionFilter("LightSide Trained Model", "model.side");
+	public static FileNameExtensionFilter predictFilter = new FileNameExtensionFilter("Predict-Only Model", "predict", "predict.side");
 
 	protected GenericLoadPanel()
 	{
@@ -54,6 +54,7 @@ public abstract class GenericLoadPanel extends AbstractListPanel
 		setLayout(new RiverLayout());
 		combo.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent ae)
 			{
 				if (combo.getSelectedItem() != null)
@@ -75,6 +76,42 @@ public abstract class GenericLoadPanel extends AbstractListPanel
 
 			}
 		});
+	}
+
+	//not directly connected to setHighlight or getHighlight - just the UI.
+	public Recipe getSelectedItem()
+	{
+		if (combo.getSelectedItem() != null)
+		{
+			return (Recipe) combo.getSelectedItem();
+		}
+		return null;
+		
+	}
+	
+	//not directly connected to setHighlight or getHighlight - just the UI.
+	public void setSelectedItem(Recipe r)
+	{
+		if (r != null)
+		{
+			combo.setSelectedItem(r);
+			save.setEnabled(true);
+			combo.setEnabled(true);
+			delete.setEnabled(true);
+		}
+		else
+		{
+			combo.setEnabled(false);
+			combo.setSelectedIndex(-1);
+			save.setEnabled(false);
+			delete.setEnabled(false);
+			describeScroll = new JScrollPane();
+			if (describePanel != null)
+			{
+				describePanel.removeAll();
+				describePanel.add(BorderLayout.CENTER, describeScroll);
+			}
+		}
 	}
 
 	public GenericLoadPanel(String l)
@@ -265,6 +302,7 @@ public abstract class GenericLoadPanel extends AbstractListPanel
 		checkChooser();
 		
 		Recipe recipe = (Recipe) combo.getSelectedItem();
+		System.out.println("saving "+recipe+" ("+recipe.getStage()+")");
 
 		if (recipe.getStage() == Stage.FEATURE_TABLE || recipe.getStage() == Stage.MODIFIED_TABLE)
 		{
@@ -359,17 +397,23 @@ public abstract class GenericLoadPanel extends AbstractListPanel
 		if (result != JFileChooser.APPROVE_OPTION) { return; }
 
 		File[] selectedFiles = chooser.getSelectedFiles();
-		HashSet<String> docNames = new HashSet<String>();
+		TreeSet<String> docNames = new TreeSet<String>();
 
 		for (File f : selectedFiles)
 		{
 			docNames.add(f.getPath());
 		}
-
-		DocumentList testDocs = new DocumentList(docNames);
+		try{
+		DocumentList testDocs = ImportController.makeDocumentList(docNames);
 		testDocs.guessTextAndAnnotationColumns();
 		Recipe r = Workbench.getRecipeManager().fetchDocumentListRecipe(testDocs);
 		setHighlight(r);
+		}catch(FileNotFoundException e){
+			JOptionPane.showMessageDialog(this, e.getMessage(), "File Not Found", JOptionPane.ERROR_MESSAGE);
+		}catch(Exception e){
+			JOptionPane.showMessageDialog(this, e.getMessage(), "Load Error", JOptionPane.ERROR_MESSAGE);
+			e.printStackTrace();
+		}
 		refreshPanel();
 		Workbench.update(this);
 	}
@@ -391,5 +435,27 @@ public abstract class GenericLoadPanel extends AbstractListPanel
 	public void clearWarning()
 	{
 		warn.setVisible(false);
+	}
+	
+	@Override
+	public void setEnabled(boolean enabled)
+	{
+		super.setEnabled(enabled);
+		
+		combo.setEnabled(enabled);
+		load.setEnabled(enabled);
+		delete.setEnabled(enabled);
+		save.setEnabled(enabled);
+		warn.setEnabled(enabled);
+		
+		for(Component c : describeScroll.getComponents())
+		{
+			c.setEnabled(enabled);
+			if(c instanceof Container)
+			for(Component cc : ((Container)c).getComponents())
+			{
+				cc.setEnabled(enabled);
+			}
+		}
 	}
 }
