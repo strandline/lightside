@@ -16,6 +16,9 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
@@ -267,6 +270,7 @@ public class BuildModelControl extends GenesisControl{
 		Recipe plan;
 		String name;
 		Exception ex;
+		private boolean audioEnabled;
 
 
 		public BuildModelTask(ActionBar action, Recipe newRecipe, String n)
@@ -300,7 +304,22 @@ public class BuildModelControl extends GenesisControl{
 				CompareModelsControl.setCompetingTrainedModelRecipe(plan);
 				PredictLabelsControl.setHighlightedTrainedModelRecipe(plan);
 				Workbench.update(Stage.TRAINED_MODEL);
+				
+				if(audioEnabled == true)
+				try
+				{
+					AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File("toolkits/train.wav"));
+					Clip clip = AudioSystem.getClip();
+					clip.open(audioInputStream);
+					clip.start();
+				}
+				catch (Exception ex)
+				{
+					System.out.println("Error playing sound.");
+					ex.printStackTrace();
+				}
 			}
+			
 		}
 		
 		@Override
