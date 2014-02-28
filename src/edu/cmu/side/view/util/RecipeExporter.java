@@ -53,6 +53,7 @@ public class RecipeExporter
 
 	protected static boolean useXML = true;
 	protected static boolean useSerialized = false;
+	protected static boolean useZip = true;
 	
 	public static JFileChooser setUpChooser(JFileChooser chooser, FileFilter... filters)
 	{
@@ -206,8 +207,10 @@ public class RecipeExporter
 
 	public static void exportToXML(Recipe recipe, File target) throws IOException
 	{
-
-		ConverterControl.writeToXML(target, recipe);
+		if(!useZip)
+			ConverterControl.writeToXML(target, recipe);
+		else
+			ConverterControl.writeToZippedXML(target, recipe);
 	}
 	
 	@Deprecated
@@ -316,7 +319,7 @@ public class RecipeExporter
 			else
 				chooser = modelChooser = setUpChooser(predictChooser, serializedPredictFilter);
 		}
-		//System.out.println("REx: chooser has "+Arrays.toString(chooser.getChoosableFileFilters()));
+		System.out.println("REx: chooser has "+Arrays.toString(chooser.getChoosableFileFilters()));
 		
 		//System.out.println("REx: getting trained model...");
 			
@@ -324,12 +327,12 @@ public class RecipeExporter
 		try
 		{
 
-			//System.out.println("REx: setting default name from selected filter...");
+			System.out.println("REx: setting default name from selected filter...");
 			chooser.setSelectedFile(new File(modelRecipe.getTrainingResult().getName() + "." + ((EndsWithFileFilter) modelChooser.getFileFilter()).getExtensions()[0]));
 
-			////System.out.println("REx: selected file is "+chooser.getSelectedFile());
+			System.out.println("REx: selected file is "+chooser.getSelectedFile());
 			
-			//System.out.println("REx: showing dialogue...");
+			System.out.println("REx: showing dialogue...");
 			int state = chooser.showDialog(null, "Save Trained Model");
 			if (state == JFileChooser.APPROVE_OPTION)
 			{

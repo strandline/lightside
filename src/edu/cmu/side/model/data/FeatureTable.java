@@ -2,6 +2,7 @@ package edu.cmu.side.model.data;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,7 +31,7 @@ public class FeatureTable implements Serializable
 	private static final long serialVersionUID = 1048801132974685418L;
 	private DocumentList documents;
 
-	private Map<Feature, Collection<FeatureHit>> hitsPerFeature;
+	private Map<Feature, FeatureHit[]> hitsPerFeature;
 	private List<Collection<FeatureHit>> hitsPerDocument;
 
 	private Map<String, double[]> numericConvertedClassValues = new HashMap<String, double[]>();
@@ -47,7 +48,7 @@ public class FeatureTable implements Serializable
 	private String[] labelArray;
 
 	private FeatureTable(){
-		this.hitsPerFeature = new TreeMap<Feature, Collection<FeatureHit>>(); //Rough guess at capacity requirement.
+		this.hitsPerFeature = new TreeMap<Feature, FeatureHit[]>(); //Rough guess at capacity requirement.
 		this.hitsPerDocument  = new ArrayList<Collection<FeatureHit>>();
 	}
 
@@ -84,12 +85,13 @@ public class FeatureTable implements Serializable
 		this.annotation=currentAnnotation;
 		this.type=type;
 		this.labelArray = labelArray;
-		this.hitsPerFeature = new TreeMap<Feature, Collection<FeatureHit>>();
+		this.hitsPerFeature = new TreeMap<Feature, FeatureHit[]>();
 		this.hitsPerDocument = new ArrayList<Collection<FeatureHit>>(0);
 		Collection<FeatureHit> emptyHits = new ArrayList<FeatureHit>(0);
+		FeatureHit[] emptyHitArray = new FeatureHit[0];
 		for(Feature f : featureList)
 		{
-			this.hitsPerFeature.put(f, emptyHits);
+			this.hitsPerFeature.put(f, emptyHitArray);
 		}
 
 		documents = docs;
@@ -107,7 +109,7 @@ public class FeatureTable implements Serializable
 		this();
 		setAnnotation(annotation);
 		this.type = type;
-		Map<Feature, Set<Integer>> localFeatures = new HashMap<Feature, Set<Integer>>(100000);
+		Map<Feature, Collection<FeatureHit>> localFeatures = new HashMap<Feature, Collection<FeatureHit>>(10000);
 		this.threshold = thresh;
 		this.documents = sdl;
 
@@ -126,23 +128,23 @@ public class FeatureTable implements Serializable
 		{
 			FeatureHit hit = hiterator.next();
 			Feature f = hit.getFeature();
-			if (!hitsPerFeature.containsKey(f))
+			if (!localFeatures.containsKey(f))
 			{
-				hitsPerFeature.put(f, new TreeSet<FeatureHit>());
+				localFeatures.put(f, new TreeSet<FeatureHit>());
 			}
-			hitsPerFeature.get(f).add(hit);
+			localFeatures.get(f).add(hit);
 			hiterator.remove(); //TODO: does emptying the hitlist while populating the table actually make a practical memory difference?
 		}
 //		System.out.println("All features added to table. Thresholding...");
 
-		Iterator<Entry<Feature, Collection<FeatureHit>>> fiterator = hitsPerFeature.entrySet().iterator();
+		Iterator<Entry<Feature, Collection<FeatureHit>>> fiterator = localFeatures.entrySet().iterator();
 
 		//System.out.println("Adding hits per document");
 		while(fiterator.hasNext())
 		{
 			Entry<Feature, Collection<FeatureHit>> entry = fiterator.next();
 			
-			int numHitsForThisFeature = hitsPerFeature.get(entry.getKey()).size();
+			int numHitsForThisFeature = localFeatures.get(entry.getKey()).size();
 			if(numHitsForThisFeature >= threshold)
 			{
 				for(FeatureHit hit : entry.getValue())
@@ -154,6 +156,11 @@ public class FeatureTable implements Serializable
 			{
 				fiterator.remove();
 			}
+		}
+		
+		for(Feature f : localFeatures.keySet())
+		{
+			hitsPerFeature.put(f, localFeatures.get(f).toArray(new FeatureHit[localFeatures.get(f).size()]));
 		}
 	}
 
@@ -330,7 +337,7 @@ public class FeatureTable implements Serializable
 	}
 
 	public Collection<FeatureHit> getHitsForFeature(Feature feature) {
-		return hitsPerFeature.get(feature);
+		return Arrays.asList(hitsPerFeature.get(feature));
 	}
 
 	public Collection<FeatureHit> getHitsForDocument(int index) {
@@ -348,8 +355,8 @@ public class FeatureTable implements Serializable
 			ft.hitsPerDocument.add(new ArrayList<FeatureHit>());
 
 		for(Feature f : hitsPerFeature.keySet()){
-			Collection<FeatureHit> hitsPerF = hitsPerFeature.get(f);
-			ft.hitsPerFeature.put(f, new TreeSet<FeatureHit>(hitsPerF));
+			FeatureHit[] hitsPerF = hitsPerFeature.get(f);
+			ft.hitsPerFeature.put(f, hitsPerF);
 			for(FeatureHit fh : hitsPerF)
 				ft.hitsPerDocument.get(fh.getDocumentIndex()).add(fh);
 		}
@@ -366,7 +373,7 @@ public class FeatureTable implements Serializable
 		ft.threshold = threshold;
 		ft.annotation = annotation;
 
-		ft.hitsPerFeature = new TreeMap<Feature, Collection<FeatureHit>>();
+		ft.hitsPerFeature = new TreeMap<Feature, FeatureHit[]>();
 		ft.threshold = threshold;
 		ft.numericConvertedClassValues = new HashMap<String, double[]>(numericConvertedClassValues);
 		ft.nominalConvertedClassValues = new ArrayList<String>(nominalConvertedClassValues);
@@ -467,60 +474,66 @@ public class FeatureTable implements Serializable
 
 	public void setHits(Collection<FeatureHit> hits)
 	{
+		setHits(hits, threshold);
+	}
+	
+	public void setHitsIgnoreThreshold(Collection<FeatureHit> hits)
+	{
+		setHits(hits, 0);
+	}
+	
+	public void setHits(Collection<FeatureHit> hits, int threshold)
+	{
 		//documents = sdl;
 		//		annotation = sdl.getCurrentAnnotation();
 		//		generateConvertedClassValues();
 
 
-		this.hitsPerFeature = new TreeMap<Feature, Collection<FeatureHit>>(); //Rough guess at capacity requirement.
-		this.hitsPerDocument  = new ArrayList<Collection<FeatureHit>>();
-
-		Map<Feature, Set<Integer>> localFeatures = new HashMap<Feature, Set<Integer>>(2000);
-
-		hitsPerDocument.clear();
-		hitsPerFeature.clear();
-
-		for(int i = 0; i < documents.getSize(); i++){
+		Map<Feature, Collection<FeatureHit>> localFeatures = new HashMap<Feature, Collection<FeatureHit>>(10000);
+		for (int i = 0; i < getDocumentList().getSize(); i++)
+		{
 			hitsPerDocument.add(new TreeSet<FeatureHit>());
 		}
-		for(FeatureHit hit : hits){
+		
+		Iterator<FeatureHit> hiterator = hits.iterator();
+		//System.out.println("adding feature hits");
+		while(hiterator.hasNext())
+		{
+			FeatureHit hit = hiterator.next();
 			Feature f = hit.getFeature();
-			if(!localFeatures.containsKey(f)){
-				localFeatures.put(f, new TreeSet<Integer>());
-			}
-			localFeatures.get(f).add(hit.getDocumentIndex());
-		}
-
-		for(FeatureHit hit : hits){
-			if(localFeatures.get(hit.getFeature()).size() >= threshold){
-				hitsPerDocument.get(hit.getDocumentIndex()).add(hit);
-				if(!hitsPerFeature.containsKey(hit.getFeature())){
-					hitsPerFeature.put(hit.getFeature(), new TreeSet<FeatureHit>());
-				}
-				hitsPerFeature.get(hit.getFeature()).add(hit);
-			}
-		}
-	}
-
-	public void setHitsIgnoreThreshold(Collection<FeatureHit> hits)
-	{
-		this.hitsPerFeature.clear();
-		this.hitsPerDocument.clear();
-
-		for (int i = 0; i < documents.getSize(); i++)
-		{
-			hitsPerDocument.add(new TreeSet<FeatureHit>());
-		}
-
-		for (FeatureHit hit : hits)
-		{
-			hitsPerDocument.get(hit.getDocumentIndex()).add(hit);
-			if (!hitsPerFeature.containsKey(hit.getFeature()))
+			if (!localFeatures.containsKey(f))
 			{
-				hitsPerFeature.put(hit.getFeature(), new TreeSet<FeatureHit>());
+				localFeatures.put(f, new TreeSet<FeatureHit>());
 			}
-			hitsPerFeature.get(hit.getFeature()).add(hit);
+			localFeatures.get(f).add(hit);
+			hiterator.remove(); //TODO: does emptying the hitlist while populating the table actually make a practical memory difference?
+		}
+//		System.out.println("All features added to table. Thresholding...");
 
+		Iterator<Entry<Feature, Collection<FeatureHit>>> fiterator = localFeatures.entrySet().iterator();
+
+		//System.out.println("Adding hits per document");
+		while(fiterator.hasNext())
+		{
+			Entry<Feature, Collection<FeatureHit>> entry = fiterator.next();
+			
+			int numHitsForThisFeature = localFeatures.get(entry.getKey()).size();
+			if(numHitsForThisFeature >= threshold)
+			{
+				for(FeatureHit hit : entry.getValue())
+				{
+					hitsPerDocument.get(hit.getDocumentIndex()).add(hit);
+				}
+			}
+			else
+			{
+				fiterator.remove();
+			}
+		}
+		
+		for(Feature f : localFeatures.keySet())
+		{
+			hitsPerFeature.put(f, localFeatures.get(f).toArray(new FeatureHit[localFeatures.get(f).size()]));
 		}
 	}
 

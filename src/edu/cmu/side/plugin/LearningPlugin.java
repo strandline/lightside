@@ -253,6 +253,7 @@ public abstract class LearningPlugin extends SIDEPlugin implements Serializable
 		return predictionResult;
 	}
 	
+//	double aggregate = 0;
 	public void aggregateFoldEvaluation(int fold, PredictionResult predictionResult, Map<Integer, Integer> foldsMap, FeatureTable table, Map<String, List<Double>> distributions, Comparable[] predictions)
 	{
 		List<? extends Comparable<?>> predictionsList = predictionResult.getPredictions();
@@ -261,8 +262,8 @@ public abstract class LearningPlugin extends SIDEPlugin implements Serializable
 		List<String> foldActual = new ArrayList<String>(500);
 
 		// int predictionIndex = 0;
-//		double correct = 0;
-//		double total = 0;
+		double correct = 0;
+		double total = 0;
 
 		Map<String, List<Double>> predictedDistros = predictionResult.getDistributions();
 		if (distributions.isEmpty() && predictedDistros != null) distributions.putAll(predictedDistros);
@@ -295,12 +296,13 @@ public abstract class LearningPlugin extends SIDEPlugin implements Serializable
 				foldPredicted.add(predictions[i]);
 				foldActual.add(table.getAnnotations().get(i));
 
-//				if (predictions[i].equals(table.getAnnotations().get(i))) correct++;
-//				total++;
+				if (predictions[i].equals(table.getAnnotations().get(i))) correct++;
+				total++;
 			}
 			// predictionIndex++;
 		}
-		// System.out.println("accuracy for fold #"+fold+": "+(100*correct/total)+"%");
+//		 double acc = 100*correct/total;
+//		 System.out.println("accuracy for fold #"+fold+": "+acc+"%");
 		// if(table.getClassValueType() != Type.NUMERIC)
 		// {
 		// String evaluation = EvaluationUtils.evaluate(foldActual,
@@ -331,6 +333,7 @@ public abstract class LearningPlugin extends SIDEPlugin implements Serializable
 		
 		for(int fold = 0; fold < numFolds; fold++)
 		{
+			System.out.println("evaluating fold "+fold);
 			PredictionResult result = results.get(fold);
 			aggregateFoldEvaluation(fold, result, foldsMap, table, distributions, predictions);
 		}
