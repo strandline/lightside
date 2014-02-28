@@ -297,6 +297,15 @@
         <jarfile>genesis.jar</jarfile>
         <classname>plugins.wrappers.FeatureSelection</classname>
     </plugin>
+    
+    <!-- <plugin>
+        <name>TFIDF</name>
+        <author>David Adamson</author>
+        <version>1.0</version>
+        <description><![CDATA[Chi squared feature selection]]></description>
+        <jarfile>genesis.jar</jarfile>
+        <classname>plugins.wrappers.TFIDFWrapper</classname>
+    </plugin> -->
 
 
 

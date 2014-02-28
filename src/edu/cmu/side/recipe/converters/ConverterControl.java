@@ -111,6 +111,7 @@ public class ConverterControl
 			}
 			catch (Exception e)
 			{
+				//e.printStackTrace();
 				throw new IOException("Failed to read recipe as "+format+" : " + recipePath, e);
 			}
 		}
