@@ -10,8 +10,6 @@ import java.util.Map;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
-import com.sun.xml.internal.ws.encoding.soap.DeserializationException;
-
 import edu.cmu.side.model.Recipe;
 import edu.cmu.side.model.RecipeManager.Stage;
 import edu.cmu.side.model.StatusUpdater;

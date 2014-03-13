@@ -1,37 +1,12 @@
 package edu.cmu.side.recipe;
 
 import java.io.File;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryUsage;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
-import javax.swing.JOptionPane;
-
-import com.sun.xml.internal.ws.encoding.soap.DeserializationException;
-
-import edu.cmu.side.model.OrderedPluginMap;
 import edu.cmu.side.model.Recipe;
 import edu.cmu.side.model.RecipeManager.Stage;
-import edu.cmu.side.model.StatusUpdater;
 import edu.cmu.side.model.data.DocumentList;
-import edu.cmu.side.model.data.FeatureTable;
-import edu.cmu.side.model.data.TrainingResult;
-import edu.cmu.side.model.feature.Feature.Type;
-import edu.cmu.side.model.feature.FeatureHit;
-import edu.cmu.side.plugin.FeaturePlugin;
-import edu.cmu.side.plugin.RestructurePlugin;
-import edu.cmu.side.plugin.SIDEPlugin;
 import edu.cmu.side.view.util.RecipeExporter;
 
 /**
