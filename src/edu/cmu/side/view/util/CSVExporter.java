@@ -5,11 +5,14 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.TableModel;
+
+import org.apache.commons.io.output.FileWriterWithEncoding;
 
 public class CSVExporter
 {
@@ -58,7 +61,7 @@ public class CSVExporter
 	{
 		if (file != null)
 		{
-				BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
+				BufferedWriter bufferedWriter = new BufferedWriter(new FileWriterWithEncoding(file, Charset.forName("UTF-8")));
 				PrintWriter fileWriter = new PrintWriter(bufferedWriter);
 
 				int cols = model.getColumnCount();
@@ -79,12 +82,12 @@ public class CSVExporter
 						if (obj != null)
 						{
 							s = obj.toString();
-							s = s.replaceAll("[\n\r]+", " ");
-							if (s.contains(","))
+//							s = s.replaceAll("[\n\r]+", " ");
+							if (s.contains(",") || s.contains("\"") || s.contains("ï¿½") || s.contains("ï¿½") || s.contains("\n") || s.contains("\r"))
 							{
 								s = s.replaceAll("\"", "\"\"");
-								s = s.replaceAll("Ó", "\"\"");
-								s = s.replaceAll("Ò", "\"\"");
+								s = s.replaceAll("ï¿½", "\"\"");
+								s = s.replaceAll("ï¿½", "\"\"");
 								s = "\"" + s + "\"";
 							}
 						}
