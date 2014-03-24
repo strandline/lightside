@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -46,6 +47,7 @@ public class ExtractFeaturesControl extends GenesisControl{
 	private static String targetAnnotation;
 	private static String selectedClassAnnotation;
 	private static Type selectedClassType;
+	protected static Logger logger = Logger.getGlobal();
 	
 	static{
 		featurePlugins = new HashMap<FeaturePlugin, Boolean>();
@@ -342,7 +344,7 @@ public class ExtractFeaturesControl extends GenesisControl{
 		@Override
 		public void requestCancel()
 		{
-			System.out.println("stopping extraction...");
+			logger.warning("stopping extraction...");
 			if(activeExtractor != null && !activeExtractor.isStopped())
 				activeExtractor.stopWhenPossible();
 		}

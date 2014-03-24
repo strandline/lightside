@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
+import java.util.logging.Logger;
 
 import edu.cmu.side.model.OrderedPluginMap;
 import edu.cmu.side.model.StatusUpdater;
@@ -64,7 +65,7 @@ public abstract class ParallelLearningPlugin extends LearningPlugin
 					}
 					catch (Exception e)
 					{
-						System.err.println("ParallelLearningPlugin 52:\tError cloning learner "+ParallelLearningPlugin.this+". Continuing with un-cloned learner");
+						logger.warning("ParallelLearningPlugin 52:\tError cloning learner "+ParallelLearningPlugin.this+". Continuing with un-cloned learner");
 						e.printStackTrace();
 						clonedLearner = ParallelLearningPlugin.this;
 					}
@@ -84,9 +85,9 @@ public abstract class ParallelLearningPlugin extends LearningPlugin
 						((ParallelTaskUpdater)updater).updateCompletion("Starting fold", fold, Completion.STARTED);
 					}
 					
-					System.out.println(new Date()+"\tParallelLearningPlugin 57:\tstarting to validate fold "+fold);
+					logger.info("ParallelLearningPlugin 57:\tstarting to validate fold "+fold);
 					PredictionResult result = clonedLearner.validateFold(fold, table, foldsMap, numFolds, clonedWrappers, progressIndicator);
-					System.out.println(new Date()+"\tParallelLearningPlugin 59:\tdone validating fold "+fold);
+					logger.info("ParallelLearningPlugin 59:\tdone validating fold "+fold);
 					
 					if(updater instanceof ParallelTaskUpdater)
 					{
@@ -130,7 +131,7 @@ public abstract class ParallelLearningPlugin extends LearningPlugin
 				}
 				catch (Exception e)
 				{
-					System.err.println("ParallelLearningPlugin 91:\tError cloning wrapper "+wrapper+". Continuing with un-cloned wrapper");
+					logger.warn("ParallelLearningPlugin 91:\tError cloning wrapper "+wrapper+". Continuing with un-cloned wrapper");
 					e.printStackTrace();
 					clone = wrapper;
 				}

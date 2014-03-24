@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.logging.Logger;
 
 import plugins.metrics.models.BasicModelEvaluations;
 import edu.cmu.side.control.BuildModelControl;
@@ -41,10 +42,11 @@ public class Chef
 //	static
 //	{
 //		System.setProperty("java.awt.headless", "true");
-//		System.out.println(java.awt.GraphicsEnvironment.isHeadless() ? "Running in headless mode." : "Not actually headless");
+//		logger.info(java.awt.GraphicsEnvironment.isHeadless() ? "Running in headless mode." : "Not actually headless");
 //	}
     
 	static boolean quiet = true;
+	static final protected Logger logger = Logger.getGlobal();
 
 	static StatusUpdater textUpdater = new StatusUpdater()
 	{
@@ -53,14 +55,14 @@ public class Chef
 		public void update(String updateSlot, int slot1, int slot2)
 		{
 			if(!quiet)
-				System.out.println(updateSlot+": "+slot1 + "/"+slot2);
+				logger.info(updateSlot+": "+slot1 + "/"+slot2);
 		}
 
 		@Override
 		public void update(String update)
 		{
 			if(!quiet)
-				System.out.println(update);	
+				logger.info(update);	
 		}
 
 		@Override
@@ -82,27 +84,27 @@ public class Chef
 		for (final SIDEPlugin plug : extractors.keySet())
 		{
 
-					if(!quiet) System.out.println("Chef: Simmering features with "+plug+"...");
-					//System.out.println("Extractor Settings: "+extractors.get(plug));
+					if(!quiet) logger.info("Chef: Simmering features with "+plug+"...");
+					//logger.info("Extractor Settings: "+extractors.get(plug));
 					Collection<FeatureHit> extractorHits = ((FeaturePlugin) plug).extractFeatureHits(corpus, extractors.get(plug), textUpdater);
 					hits.addAll(extractorHits);
 
-			if (!quiet) System.out.println("Chef: Finished simmering with " + plug + "...");
+			if (!quiet) logger.info("Chef: Finished simmering with " + plug + "...");
 		}
 
-		if (!quiet) System.out.println("Chef: Done simmering with plugins!");
+		if (!quiet) logger.info("Chef: Done simmering with plugins!");
 
-		if (!quiet) System.out.println("Chef: Building feature table...");
+		if (!quiet) logger.info("Chef: Building feature table...");
 
 		FeatureTable ft = new FeatureTable(corpus, hits, threshold, annotation, type);
 		recipe.setFeatureTable(ft);
 
-		if (!quiet) System.out.println("Chef: Done building feature table!");
+		if (!quiet) logger.info("Chef: Done building feature table!");
 		if(recipe.getStage().compareTo(Stage.MODIFIED_TABLE) >= 0) //recipe includes filtering
 		{
 			for (SIDEPlugin plug : recipe.getFilters().keySet())
 			{
-				if(!quiet) System.out.println("Restructuring features with "+plug+"...");
+				if(!quiet) logger.info("Restructuring features with "+plug+"...");
 				ft = ((RestructurePlugin) plug).restructure(recipe.getTrainingTable(), recipe.getFilters().get(plug), threshold, textUpdater);
 			}
 			recipe.setFilteredTable(ft);
@@ -167,7 +169,7 @@ public class Chef
 	//Build Model
 	protected static Recipe broilModel(Recipe newRecipe) throws Exception
 	{
-		if(!quiet) System.out.println("Training model with "+newRecipe.getLearner()+"...");
+		if(!quiet) logger.info("Training model with "+newRecipe.getLearner()+"...");
 		TrainingResult trainResult = newRecipe.getLearner().train(newRecipe.getTrainingTable(), newRecipe.getLearnerSettings(), newRecipe.getValidationSettings(), newRecipe.getWrappers(), textUpdater);
 		newRecipe.setTrainingResult(trainResult);
 		newRecipe.setLearnerSettings(newRecipe.getLearner().generateConfigurationSettings());
@@ -180,7 +182,7 @@ public class Chef
 	 */
 	protected static void prepareDocumentList(Recipe originalRecipe, DocumentList corpus)
 	{
-		if(!quiet) System.out.println("Preparing documents...");
+		if(!quiet) logger.info("Preparing documents...");
 		DocumentList original = originalRecipe.getDocumentList();
 		FeatureTable originalTable = originalRecipe.getTrainingTable();
 		String currentAnnotation = originalTable.getAnnotation();
@@ -230,11 +232,11 @@ public class Chef
 			corpusFiles.add(args[i]);
 		}
 
-		if(!quiet) System.out.println("Loading "+recipePath);
+		if(!quiet) logger.info("Loading "+recipePath);
 		Recipe recipe = loadRecipe(recipePath);
 		printMemoryUsage();
 
-		if(!quiet) System.out.println("Loading documents: "+corpusFiles);
+		if(!quiet) logger.info("Loading documents: "+corpusFiles);
 		Recipe result = followRecipe(recipe, new DocumentList(corpusFiles), recipe.getStage(), recipe.getFeatureTable().getThreshold());
 		
 		if(result.getStage().compareTo(Stage.TRAINED_MODEL) >= 0)
@@ -242,7 +244,7 @@ public class Chef
 			displayTrainingResults(result);
 		}
 
-		System.out.println("Saving finished recipe to "+outPath);
+		logger.info("Saving finished recipe to "+outPath);
 		saveRecipe(result, new File(outPath), RecipeFileFormat.XML);
 	}
 
@@ -256,7 +258,7 @@ public class Chef
 		double beanMax = usage.getMax() / gigs;
 		double beanUsed = usage.getUsed() / gigs;
 
-		System.out.println(String.format("%.1f/%.1f GB used", beanUsed, beanMax));
+		logger.info(String.format("%.1f/%.1f GB used", beanUsed, beanMax));
 	}
 
 	/**
@@ -267,10 +269,10 @@ public class Chef
 		if(recipe.getStage().compareTo(Stage.TRAINED_MODEL) >= 0)
 		{
 			TrainingResult trainingResult = recipe.getTrainingResult();
-			System.out.println(trainingResult.getTextConfusionMatrix());
+			logger.info(trainingResult.getTextConfusionMatrix());
 			BasicModelEvaluations eval = new BasicModelEvaluations();
-			System.out.println("Accuracy\t"+eval.getAccuracy(trainingResult));
-			System.out.println("Kappa\t"+eval.getKappa(trainingResult));
+			logger.info("Accuracy\t"+eval.getAccuracy(trainingResult));
+			logger.info("Kappa\t"+eval.getKappa(trainingResult));
 		}
 	}
 	
