@@ -127,12 +127,12 @@ public abstract class LearningPlugin extends SIDEPlugin implements Serializable
 					albertaFoldsMap.put(i, Integer.parseInt(annotations.get(i)));
 				}
 				FeatureTable albertaTrain = table.cloneTrainingFold(albertaFoldsMap, 0, true);
-				System.out.println("************************ Training set has " + albertaTrain.getSize() + " instances.");
+				logger.info("************************ Training set has " + albertaTrain.getSize() + " instances.");
 				FeatureTable pass = wrapAndTrain(albertaTrain, wrappers, progressIndicator, defaultFoldMapZero, 1);
 
 				progressIndicator.update("Testing model");
 				FeatureTable albertaTest = table.cloneTrainingFold(albertaFoldsMap, 0, false);
-				System.out.println("************************ Test set has " + albertaTest.getSize() + " instances.");
+				logger.info("************************ Test set has " + albertaTest.getSize() + " instances.");
 				result = evaluateTestSet(pass, albertaTest, wrappers, progressIndicator);
 			}
 		}
@@ -280,7 +280,7 @@ public abstract class LearningPlugin extends SIDEPlugin implements Serializable
 						Double scoreForLabel;
 						if (i >= predictedDistros.get(label).size())
 						{
-							System.out.println("LP 273: prediction result distribution size does not match label/doc array size: " + i + " >= "
+							logger.info("LP 273: prediction result distribution size does not match label/doc array size: " + i + " >= "
 									+ predictedDistros.get(label).size());
 							scoreForLabel = 0.0;
 							while (i >= predictedDistros.get(label).size())
@@ -300,13 +300,13 @@ public abstract class LearningPlugin extends SIDEPlugin implements Serializable
 			}
 			// predictionIndex++;
 		}
-		// System.out.println("accuracy for fold #"+fold+": "+(100*correct/total)+"%");
+		// logger.info("accuracy for fold #"+fold+": "+(100*correct/total)+"%");
 		// if(table.getClassValueType() != Type.NUMERIC)
 		// {
 		// String evaluation = EvaluationUtils.evaluate(foldActual,
 		// foldPredicted, labelArray,
 		// BuildModelControl.getNewName()+".fold"+fold+".eval");
-		// System.out.println(evaluation);
+		// logger.info(evaluation);
 		// if(out != null) out.println(evaluation);
 		// }
 	}
@@ -401,7 +401,7 @@ public abstract class LearningPlugin extends SIDEPlugin implements Serializable
 	{
 		synchronized(this)
 		{
-//			System.out.println("LP 344: wrap original table (for reconciliation)");
+//			logger.info("LP 344: wrap original table (for reconciliation)");
 			FeatureTable wrappedTrain = wrapTableBefore(originalData, 0, new DefaultMap<Integer, Integer>(0), progressIndicator, wrappers, false);
 			this.loadClassifierFromSettings(configuration);
 			return predictOnFold(wrappedTrain, newData, 0, new DefaultMap<Integer, Integer>(0), progressIndicator, wrappers);
@@ -411,7 +411,7 @@ public abstract class LearningPlugin extends SIDEPlugin implements Serializable
 	public PredictionResult predictOnFold(FeatureTable originalData, FeatureTable newData, int fold, Map<Integer, Integer> foldsMap,
 			StatusUpdater progressIndicator, OrderedPluginMap wrappers) throws Exception
 	{
-//		System.out.println("LP 353: wrap new table (for classification)");
+//		logger.info("LP 353: wrap new table (for classification)");
 		newData = wrapTableBefore(newData, fold, foldsMap, progressIndicator, wrappers, false);
 
 		Object predictionContext = prepareToPredict(originalData, newData, fold, foldsMap);
@@ -436,7 +436,7 @@ public abstract class LearningPlugin extends SIDEPlugin implements Serializable
 	{
 		for (SIDEPlugin wrapper : wrappers.keySet())
 		{
-			// System.out.println("LP 382: wrapping prediction result with "+wrapper
+			// logger.info("LP 382: wrapping prediction result with "+wrapper
 			// + ": "+wrappers.get(wrapper));
 			prediction = ((WrapperPlugin) wrapper).wrapResultAfter(prediction, table, fold, foldsMap, updater);
 		}

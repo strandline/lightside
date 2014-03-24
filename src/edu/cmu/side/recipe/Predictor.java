@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
@@ -36,6 +37,7 @@ public class Predictor
 	// File name/location is defined in parameter map
 	Recipe recipe;
 	private boolean quiet = true;
+	protected static final Logger logger = Logger.getGlobal();
 
 	StatusUpdater textUpdater = new StatusUpdater()
 	{
@@ -69,7 +71,7 @@ public class Predictor
 	public Predictor(Map<String, String> params) throws IOException, FileNotFoundException
 	{
 
-		if (!isQuiet()) System.out.println(params);
+		if (!isQuiet()) logger.info(params.toString());
 
 		this.modelPath = params.get("path");
 		this.predictionAnnotation = params.get("prediction");
@@ -155,8 +157,8 @@ public class Predictor
 
 			if (!isQuiet())
 			{
-				System.out.println(predictTable.getFeatureSet().size() + " features total");
-				System.out.println(predictTable.getHitsForDocument(0).size() + " feature hits in document 0");
+				logger.info(predictTable.getFeatureSet().size() + " features total");
+				logger.info(predictTable.getHitsForDocument(0).size() + " feature hits in document 0");
 			}
 			calculatePredictionStats(predictTable);
 
@@ -222,8 +224,8 @@ public class Predictor
 //				statsMap.put("wordCountAvg", lengthStats.getMean());
 //				statsMap.put("wordCountDev", lengthStats.getStandardDeviation());
 		
-		System.out.println("Feature Density Mean: "+densityStats.getMean());
-		System.out.println("Feature Density Deviation: "+densityStats.getStandardDeviation());
+		logger.info("Feature Density Mean: "+densityStats.getMean());
+		logger.info("Feature Density Deviation: "+densityStats.getStandardDeviation());
 //			
 	}
 
@@ -242,8 +244,8 @@ public class Predictor
 
 			if (!isQuiet())
 			{
-				System.out.println(predictTable.getFeatureSet().size() + " features total");
-				System.out.println(predictTable.getHitsForDocument(0).size() + " feature hits in document 0");
+				logger.info(predictTable.getFeatureSet().size() + " features total");
+				logger.info(predictTable.getHitsForDocument(0).size() + " feature hits in document 0");
 			}
 
 			result = predictFromTable(predictTable);
@@ -264,8 +266,8 @@ public class Predictor
 
 		if (!isQuiet())
 		{
-			System.out.println(predictTable.getHitsForDocument(0).size() + " feature hits in document 0 after reconciliation");
-			System.out.println(predictTable.getFeatureSet().size() + " features total");
+			logger.info(predictTable.getHitsForDocument(0).size() + " feature hits in document 0 after reconciliation");
+			logger.info(predictTable.getFeatureSet().size() + " features total");
 		}
 
 		result = recipe.getLearner().predict(trainingTable, predictTable, recipe.getLearnerSettings(), textUpdater, recipe.getWrappers());
@@ -363,20 +365,20 @@ public class Predictor
 		// e.printStackTrace();
 		// }
 
-		System.out.println("loading predictor from " + modelPath);
+		logger.info("loading predictor from " + modelPath);
 		Predictor predictor = new Predictor(modelPath, annotation);
 		predictor.setQuiet(false);
 
-		System.out.println("loading docs from " + unlabeledData);
+		logger.info("loading docs from " + unlabeledData);
 		DocumentList docs = new DocumentList(new HashSet<String>(Arrays.asList(unlabeledData)));
 
-		System.out.println("predicting...");
+		logger.info("predicting...");
 		PredictionResult predicted = predictor.predict(docs);
 		List<? extends Comparable<?>> predictions = predicted.getPredictions();
 		for (int i = 0; i < docs.getSize(); i++)
 		{
 			String text = docs.getPrintableTextAt(i);
-			System.out.println(predictions.get(i) + "\t" + text.substring(0, Math.min(100, text.length())));
+			logger.info(predictions.get(i) + "\t" + text.substring(0, Math.min(100, text.length())));
 		}
 
 		// Scanner input = new Scanner(System.in);
@@ -386,7 +388,7 @@ public class Predictor
 		// String sentence = input.nextLine();
 		// String answer = predictor.prettyPredict(sentence);
 		// // actualOut.println(answer);
-		// System.out.println(answer + "\t" + sentence.substring(0,
+		// logger.info(answer + "\t" + sentence.substring(0,
 		// Math.min(sentence.length(), 100)));
 		// }
 	}

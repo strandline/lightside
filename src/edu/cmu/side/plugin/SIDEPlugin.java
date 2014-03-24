@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import edu.cmu.side.plugin.control.PluginManager;
 
@@ -16,6 +17,8 @@ public abstract class SIDEPlugin implements Cloneable, Comparable<SIDEPlugin>
 
 	protected boolean halt;
 	private static boolean useSharedPluginsInDeserializedRecipes = true;
+	
+	protected final static Logger logger = Logger.getGlobal();
 
 	private Map<String, String> aboutMap = new HashMap<String, String>();
 
@@ -135,7 +138,7 @@ public abstract class SIDEPlugin implements Cloneable, Comparable<SIDEPlugin>
 	{
 		SIDEPlugin plugin;
 	
-		System.out.println(new Date()+"\tSidePlugin: loading plugin "+pug+"...");
+		logger.info(new Date()+"\tSidePlugin: loading plugin "+pug+"...");
 		
 		if(pug == null) 
 		{

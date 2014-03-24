@@ -3,6 +3,7 @@ package edu.cmu.side.model.feature;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import edu.cmu.side.model.data.FeatureTable;
 
@@ -15,7 +16,8 @@ import edu.cmu.side.model.data.FeatureTable;
 public class FeatureHit implements Comparable<FeatureHit>, Serializable
 {
 	private static final long serialVersionUID = 1423521357321268667L;
-
+	protected static final Logger logger = Logger.getGlobal();
+	
 	/**
 	 * which feature hit here?
 	 */
@@ -61,7 +63,7 @@ public class FeatureHit implements Comparable<FeatureHit>, Serializable
 	public Object getValue()
 	{
 		if(!isValid())
-			System.out.println("warning: feature hit "+this+" is not currently valid");
+			logger.warning("Feature hit "+this+" is not currently valid");
 		return value;
 	}
 

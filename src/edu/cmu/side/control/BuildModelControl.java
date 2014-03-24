@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -57,6 +58,7 @@ public class BuildModelControl extends GenesisControl{
 	private static String newName = "model";
 	
 	private static boolean currentlyTraining = false;
+	protected static Logger logger = Logger.getGlobal();
 
 	static{
 		validationSettings = new TreeMap<String, Serializable>();
@@ -128,7 +130,7 @@ public class BuildModelControl extends GenesisControl{
 	public static Map<Integer, Integer> getFoldsMapRandom(DocumentList documents, int num){
 		Map<Integer, Integer> foldsMap = new TreeMap<Integer, Integer>();
 
-//		System.out.println("BMC 125: fold randomly using up to "+num+" folds for "+documents.getSize() + " documents");
+//		System.out.println("BMC 125: fold 'randomly' using up to "+num+" folds for "+documents.getSize() + " documents");
 		for(int i = 0; i < documents.getSize(); i++){
 			foldsMap.put(i, i%num);
 		}
@@ -317,7 +319,7 @@ public class BuildModelControl extends GenesisControl{
 				}
 				catch (Exception ex)
 				{
-					System.out.println("Error playing sound.");
+					logger.warning("Error playing choo-choo sound.");
 					ex.printStackTrace();
 				}
 			}

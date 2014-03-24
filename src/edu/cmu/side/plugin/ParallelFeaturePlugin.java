@@ -81,7 +81,7 @@ public abstract class ParallelFeaturePlugin extends FeaturePlugin
 						{
 							if((index+1)%50 == 0 || index == size)
 							{
-								//System.out.println("Thread "+threadIndex+": Extracting doc "+(index+1)+"/"+(offset+chunk)+" for "+pluginName);
+								//logger.info("Thread "+threadIndex+": Extracting doc "+(index+1)+"/"+(offset+chunk)+" for "+pluginName);
 								synchronized(updater)
 								{updater.update("Extracting " + pluginName, index+1, size);}
 							}
@@ -95,14 +95,14 @@ public abstract class ParallelFeaturePlugin extends FeaturePlugin
 								
 							}
 							
-							//System.out.println("Extracting doc "+index+" for "+ParallelFeaturePlugin.this.toString());
+							//logger.info("Extracting doc "+index+" for "+ParallelFeaturePlugin.this.toString());
 							
 							Collection<FeatureHit> docHits = extractFeatureHitsFromDocument(documents, index);
-							//System.out.println("Thread "+threadIndex+": Adding hits for doc "+index+".");
+							//logger.info("Thread "+threadIndex+": Adding hits for doc "+index+".");
 							hits.addAll(docHits);
 						}
 					}
-					System.out.println("Thread "+threadIndex + " complete.");
+					logger.info("Thread "+threadIndex + " complete.");
 					if(updater instanceof ParallelTaskUpdater)
 					{
 						((ParallelTaskUpdater)updater).updateCompletion("Finished Extraction Thread", threadIndex, Completion.DONE);
@@ -118,7 +118,7 @@ public abstract class ParallelFeaturePlugin extends FeaturePlugin
 		}
 
 
-		System.out.println("invoking "+tasks.size()+" tasks...");
+		logger.info("invoking "+tasks.size()+" tasks...");
 		try
 		{
 			ExecutorService pool = ThreadPoolManager.getThreadPool();
@@ -144,7 +144,7 @@ public abstract class ParallelFeaturePlugin extends FeaturePlugin
 			
 		}
 		
-		System.out.printf("Parallel extraction complete in %.1f seconds.\n",(System.currentTimeMillis()-start)/1000.0);
+		logger.info(String.format("Parallel extraction complete in %.1f seconds.\n",(System.currentTimeMillis()-start)/1000.0));
 		
 		updater.update(this+" Extraction complete.");
 		
