@@ -324,8 +324,8 @@ public class RecipeExporter
 		TrainingResult result = modelRecipe.getTrainingResult();
 		try
 		{
-
-			String pathname = modelRecipe.getTrainingResult().getName() + "." + ((EndsWithFileFilter) modelChooser.getFileFilter()).getExtensions()[0];
+			String name = result.getName() != null ? result.getName() : modelRecipe.getRecipeName();
+			String pathname = name + "." + ((EndsWithFileFilter) modelChooser.getFileFilter()).getExtensions()[0];
 			System.out.println("REx: setting default name '"+pathname+"' from selected filter...");
 			chooser.setSelectedFile(new File(pathname));
 
