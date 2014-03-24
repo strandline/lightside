@@ -87,7 +87,17 @@ public class ParallelTaskUpdater extends JPanel implements StatusUpdater
 		this.setMinimumSize(new Dimension(200, 20));
 		this.setBackground(Color.WHITE);
 		this.add("left hfill", textLabel);
-		this.add("right", canvas);
+		this.add("right vfill", canvas);
+	}
+	
+	@Override
+	public void setPreferredSize(Dimension d)
+	{
+		super.setPreferredSize(d);
+		if(d.width > 200)
+		{
+			canvas.setPreferredSize(new Dimension(d.width, 20));
+		}
 	}
 	
 	synchronized public void updateCompletion(String textSlot, int taskNumber, Completion state) 
