@@ -1,5 +1,6 @@
 package edu.cmu.side.model;
 
+import java.awt.Component;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -7,29 +8,70 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedMap;
 
-import org.junit.Test;
-
-import plugins.analysis.one.text.ModelTextOutput;
-
-import edu.cmu.side.plugin.SIDEPlugin;
+import javax.swing.JPanel;
 
 import junit.framework.TestCase;
 
+import org.junit.Test;
+
+import edu.cmu.side.plugin.SIDEPlugin;
+
 public class OrderedPluginMapTest extends TestCase {
-	ModelTextOutput test1Plugin;
-	ModelTextOutput test2Plugin;
-	ModelTextOutput test3Plugin;
-	ModelTextOutput notEqualPlugin;
+	
+	class DummyPlugin extends SIDEPlugin
+	{
+
+		@Override
+		public String getOutputName()
+		{
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public String getType()
+		{
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		protected Component getConfigurationUIForSubclass()
+		{
+			// TODO Auto-generated method stub
+			return new JPanel();
+		}
+
+		@Override
+		public Map<String, String> generateConfigurationSettings()
+		{
+			// TODO Auto-generated method stub
+			return new HashMap<String, String>();
+		}
+
+		@Override
+		public void configureFromSettings(Map<String, String> settings)
+		{
+			// TODO Auto-generated method stub
+			
+		}
+		
+	};
+	
+	DummyPlugin test1Plugin;
+	DummyPlugin test2Plugin;
+	DummyPlugin test3Plugin;
+	DummyPlugin notEqualPlugin;
 	HashMap<String, String> test1Map;
 	HashMap<String, String> test2Map;
 	HashMap<String, String> test3Map;
 	OrderedPluginMap testOnThis;
 	@Override
 	public void setUp(){
-		test1Plugin = new ModelTextOutput();
-		test2Plugin = new ModelTextOutput();
-		test3Plugin = new ModelTextOutput();
-		notEqualPlugin = new ModelTextOutput();
+		test1Plugin = new DummyPlugin();
+		test2Plugin = new DummyPlugin();
+		test3Plugin = new DummyPlugin();
+		notEqualPlugin = new DummyPlugin();
 		test1Map = new HashMap<String,String>();
 		test2Map = new HashMap<String,String>();
 		test3Map = new HashMap<String,String>();
