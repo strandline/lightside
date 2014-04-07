@@ -913,8 +913,8 @@ public class DocumentListTest extends TestCase{
 	public void testGetAnnotationArrayNull(){
 		DocumentList dList = new DocumentList("test");
 		try{
-			dList.getAnnotationArray(null);
-			fail("Didn't throw expected exception");
+			List<String> notes = dList.getAnnotationArray(null);
+			assertNull(notes);
 		}catch(NoSuchElementException e){
 			;
 		}

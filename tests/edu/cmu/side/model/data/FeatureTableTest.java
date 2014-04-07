@@ -1,24 +1,31 @@
 package edu.cmu.side.model.data;
 
+import java.awt.Component;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.TreeSet;
 
-import org.junit.Test;
+import javax.swing.JPanel;
 
-import plugins.features.BasicFeatures;
+import junit.framework.TestCase;
+
+import org.junit.Test;
 
 import edu.cmu.side.model.StatusUpdater;
 import edu.cmu.side.model.feature.Feature;
 import edu.cmu.side.model.feature.FeatureHit;
+import edu.cmu.side.model.feature.Feature.Type;
 import edu.cmu.side.plugin.FeaturePlugin;
-import junit.framework.TestCase;
 
 public class FeatureTableTest extends TestCase{
 	private static final int NUM_GALLUP_INSTANCES = 942;
-	private static final int NUM_GALLUP_FEATURES = 338;
+	private static final int NUM_GALLUP_FEATURES = 347;
 	static StatusUpdater textUpdater = new StatusUpdater()
 	{
 
@@ -49,7 +56,76 @@ public class FeatureTableTest extends TestCase{
 //	static DocumentList numericDocList;
 	Boolean hasChanged = true;
 	static Boolean quiet = false;
-	static FeaturePlugin featureMaker = new BasicFeatures();
+	
+	//a legitimate unigram feature extractor.
+	static FeaturePlugin featureMaker = new FeaturePlugin()
+	{
+		
+		@Override
+		public List<String> tokenize(Feature f, String s)
+		{
+			return Arrays.asList(s);
+		}
+		
+		@Override
+		public boolean isTokenized(Feature f)
+		{
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		public Collection<FeatureHit> extractFeatureHitsForSubclass(DocumentList documents, StatusUpdater update)
+		{
+			Collection<FeatureHit> hits = new ArrayList<FeatureHit>();
+			
+			Map<String, List<String>> textColumns = documents.getCoveredTextList();
+			for(String column : textColumns.keySet())
+			{
+				List<String> textColumn = textColumns.get(column);
+				for(int i = 0; i < textColumn.size(); i++)
+				{
+					String text = textColumn.get(i);
+					HashSet<String> words = new HashSet(Arrays.asList(text.split("\\s+")));
+					for(String word : words)
+					{
+						Feature foo = Feature.fetchFeature("dummy", word, Type.BOOLEAN, this);
+						hits.add(new FeatureHit(foo, Boolean.TRUE, i));
+					}
+				}
+			}
+			return hits;
+			
+		}
+
+		@Override
+		public String getOutputName()
+		{
+			// TODO Auto-generated method stub
+			return "Dummy Extractor";
+		}
+
+		@Override
+		protected Component getConfigurationUIForSubclass()
+		{
+			// TODO Auto-generated method stub
+			return new JPanel();
+		}
+
+		@Override
+		public Map<String, String> generateConfigurationSettings()
+		{
+			// TODO Auto-generated method stub
+			return new HashMap<String, String>();
+		}
+
+		@Override
+		public void configureFromSettings(Map<String, String> settings)
+		{
+			// TODO Auto-generated method stub
+			
+		}
+	};
 	static Collection<FeatureHit> featureHits;
 //	static Collection<FeatureHit> numericFeatureHits;
 
@@ -179,15 +255,15 @@ public class FeatureTableTest extends TestCase{
 		String annotation = docList.currentAnnotation;
 		int thresh = 5;
 		FeatureTable ft = new FeatureTable(docList, featureHits, thresh, annotation, Feature.Type.NOMINAL);
-		assertEquals(ft.getFeatureSet().size(), NUM_GALLUP_FEATURES);
+		assertEquals(NUM_GALLUP_FEATURES, ft.getFeatureSet().size());
 	}
 	@Test
 	public void testGetSortedFeatures(){
 		String annotation = docList.currentAnnotation;
 		int thresh = 5;
 		FeatureTable ft = new FeatureTable(docList, featureHits, thresh, annotation, Feature.Type.NOMINAL);
-		assertEquals(ft.getSortedFeatures().size(), NUM_GALLUP_FEATURES);
-		assertEquals(((TreeSet<Feature>) ft.getSortedFeatures()).first().toString(),"<COMMA>");
+		assertEquals(NUM_GALLUP_FEATURES, ft.getSortedFeatures().size());
+		assertEquals(".", ((TreeSet<Feature>) ft.getSortedFeatures()).first().toString());
 	}
 	@Test
 	public void testGetHitsForFeature(){
@@ -196,9 +272,9 @@ public class FeatureTableTest extends TestCase{
 		FeatureTable ft = new FeatureTable(docList, featureHits, thresh, annotation, Feature.Type.NOMINAL);
 		Iterator<Feature> iter = ft.getFeatureSet().iterator();
 		
-		Collection<FeatureHit> hitsForFeat = ft.getHitsForFeature(iter.next());
+		Collection<FeatureHit> hitsForFeat = ft.getHitsForFeature(Feature.fetchFeature("dummy", ".", Type.BOOLEAN));
 		System.out.println(hitsForFeat.toString());
-		assertEquals(hitsForFeat.size(),274);
+		assertEquals(6, hitsForFeat.size());
 	}
 	@Test
 	public void testGetHitsForDocument(){
@@ -207,7 +283,8 @@ public class FeatureTableTest extends TestCase{
 		FeatureTable ft = new FeatureTable(docList, featureHits, thresh, annotation, Feature.Type.NOMINAL);
 		Collection<FeatureHit> features = ft.getHitsForDocument(0);
 		System.out.println(features.size());
-		assertEquals(8, features.size());
+		System.out.println(features);
+		assertEquals(7, features.size());
 	}
 	
 	
