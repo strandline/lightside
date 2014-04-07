@@ -21,7 +21,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
-import plugins.learning.WekaTools;
+import edu.cmu.side.Workbench;
 import edu.cmu.side.util.ThreadPoolManager;
 
 public class SystemMonitorPanel extends JPanel
@@ -30,6 +30,8 @@ public class SystemMonitorPanel extends JPanel
 	private static final ImageIcon SINGLE_CORE_ICON = new ImageIcon("toolkits/icons/arrow_right.png");
 	private static final String MULTITHREAD_LABEL = "Multithreaded";
 	private static final ImageIcon MULTITHREAD_ICON = new ImageIcon("toolkits/icons/arrow_divide_right.png");
+	public static final Object GARBAGE_COLLECTION_OBSERVABLE = "GARBAGE_COLLECTION";
+	
 	//JLabel textMonitor = new JLabel();
 	WarningButton warnButton = new WarningButton();
 	JButton bugButton = new JButton("<html><u>Report a Bug</u></html>", new ImageIcon("toolkits/icons/bug.png"));
@@ -188,7 +190,8 @@ public class SystemMonitorPanel extends JPanel
 
 		System.out.println(String.format("MMP 137: %.1f GB used now... attempting GC", beanUsed, beanMax));
 
-		WekaTools.invalidateCache();
+//		WekaTools.invalidateCache();
+		Workbench.update(GARBAGE_COLLECTION_OBSERVABLE);
 		System.gc();
 
 		usage = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage();

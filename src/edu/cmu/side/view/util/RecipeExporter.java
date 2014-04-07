@@ -5,6 +5,8 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -15,9 +17,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
-import plugins.learning.WekaTools;
-import weka.core.Instances;
-import weka.core.converters.ArffSaver;
 import edu.cmu.side.model.Recipe;
 import edu.cmu.side.model.RecipeManager.Stage;
 import edu.cmu.side.model.data.DocumentList;
@@ -188,7 +187,10 @@ public class RecipeExporter
 				}
 
 				if (tableChooser.getFileFilter() == csvFilter) exportToCSV(table, f);
-				else if (tableChooser.getFileFilter() == arffFilter) exportToARFF(table, f);
+				else if (tableChooser.getFileFilter() == arffFilter) 
+				{
+					exportToARFF(table, f);
+				}
 				else if (tableChooser.getFileFilter() == xmlTableFilter) exportToXML(tableRecipe, f);
 				else if (tableChooser.getFileFilter() == serializedTableFilter) exportToSerialized(tableRecipe, f);
 			}
@@ -205,6 +207,22 @@ public class RecipeExporter
 
 	}
 
+	public static void exportToARFF(FeatureTable table, File f) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
+			InvocationTargetException
+	{
+		try
+		{
+			Class wekaToolsClass = ClassLoader.getSystemClassLoader().loadClass("plugins.learning.WekaTools");
+			Method exportMethod = wekaToolsClass.getMethod("exportToARFF", FeatureTable.class, File.class);
+			exportMethod.invoke(null, table, f);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "Couldn't export to ARFF - is the genesis.jar plugin package in place?\n"+e.getMessage(), "Export Error", JOptionPane.WARNING_MESSAGE);
+		}
+	}
+
 	public static void exportToXML(Recipe recipe, File target) throws IOException
 	{
 
@@ -219,23 +237,7 @@ public class RecipeExporter
 		ObjectOutputStream oos = new ObjectOutputStream(fout);
 		oos.writeObject(recipe);
 	}
-
-	public static void exportToARFF(FeatureTable ft, File out) throws IOException
-	{
-
-		boolean[] mask = new boolean[ft.getSize()];
-		for (int i = 0; i < mask.length; i++)
-		{
-			mask[i] = true;
-		}
-
-		Instances instances = WekaTools.getInstances(ft, mask);
-		ArffSaver arffSaver = new ArffSaver();
-		arffSaver.setInstances(instances);
-		arffSaver.setFile(out);
-		arffSaver.writeBatch();
-	}
-
+	
 	public static void exportToCSV(FeatureTable ft, File file) throws IOException
 	{
 
