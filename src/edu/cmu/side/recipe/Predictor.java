@@ -2,11 +2,13 @@ package edu.cmu.side.recipe;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.logging.Logger;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
@@ -37,7 +39,7 @@ public class Predictor
 	// File name/location is defined in parameter map
 	Recipe recipe;
 	private boolean quiet = true;
-	protected static final Logger logger = Logger.getGlobal();
+	protected static final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	StatusUpdater textUpdater = new StatusUpdater()
 	{
@@ -186,8 +188,7 @@ public class Predictor
 					newDocs.addAnnotation(predictionColumn + "_" + label, stringDists, overWrite);
 				}
 			}
-			
-			
+
 			return newDocs;
 		}
 		catch (Exception e)
@@ -202,31 +203,31 @@ public class Predictor
 		SummaryStatistics hitStats = new SummaryStatistics();
 		SummaryStatistics densityStats = new SummaryStatistics();
 		SummaryStatistics lengthStats = new SummaryStatistics();
-		
+
 		DocumentList docs = predictTable.getDocumentList();
-		
-		for(int i = 0; i < docs.getSize(); i++)
+
+		for (int i = 0; i < docs.getSize(); i++)
 		{
 			double hitCount = predictTable.getHitsForDocument(i).size();
 			hitStats.addValue(hitCount);
 			double length = docs.getPrintableTextAt(i).length();
-			densityStats.addValue(hitCount / (1.0+length));
+			densityStats.addValue(hitCount / (1.0 + length));
 
 			double wordLength = docs.getPrintableTextAt(i).split("\\s+").length;
 			lengthStats.addValue(wordLength);
 		}
-		
-//				Map<String, Double> statsMap = new HashMap<String, Double>();
-//				statsMap.put("hitCountAvg", hitStats.getMean());
-//				statsMap.put("hitCountDev", hitStats.getStandardDeviation());
-//				statsMap.put("hitDensityAvg", densityStats.getMean());
-//				statsMap.put("hitDensityDev", densityStats.getStandardDeviation());
-//				statsMap.put("wordCountAvg", lengthStats.getMean());
-//				statsMap.put("wordCountDev", lengthStats.getStandardDeviation());
-		
-		logger.info("Feature Density Mean: "+densityStats.getMean());
-		logger.info("Feature Density Deviation: "+densityStats.getStandardDeviation());
-//			
+
+		// Map<String, Double> statsMap = new HashMap<String, Double>();
+		// statsMap.put("hitCountAvg", hitStats.getMean());
+		// statsMap.put("hitCountDev", hitStats.getStandardDeviation());
+		// statsMap.put("hitDensityAvg", densityStats.getMean());
+		// statsMap.put("hitDensityDev", densityStats.getStandardDeviation());
+		// statsMap.put("wordCountAvg", lengthStats.getMean());
+		// statsMap.put("wordCountDev", lengthStats.getStandardDeviation());
+
+		logger.info("Feature Density Mean: " + densityStats.getMean());
+		logger.info("Feature Density Deviation: " + densityStats.getStandardDeviation());
+		//
 	}
 
 	/**
@@ -342,55 +343,61 @@ public class Predictor
 		String modelPath = "saved/bayes.model.side";
 		if (args.length < 1)
 		{
-			System.err.println("usage: just_predict.sh path/to/my.model.side [annotation_name]");
+			System.err.println("usage: predict.sh path/to/saved/model.xml [path/to/unlabeled/data.csv]");
 		}
 		else
 			modelPath = args[0];
 
 		String annotation = "predicted";
-		String unlabeledData = "data/mine/movies_unlabeled.csv";
+		String unlabeledData = null;
 		if (args.length > 1) unlabeledData = args[1];
 
 		// to swallow all output except for the classifications
-		// PrintStream actualOut = System.out;
-		//
-		// try
-		// {
-		// String outLogFilename = "simple_side_predict.log";
-		// PrintStream logPrintStream = new PrintStream(outLogFilename);
-		// System.setOut(logPrintStream);
-		// }
-		// catch (FileNotFoundException e)
-		// {
-		// e.printStackTrace();
-		// }
+		PrintStream actualOut = System.out;
+
+		try
+		{
+			String outLogFilename = "predict.log";
+			PrintStream logPrintStream = new PrintStream(outLogFilename);
+			System.setOut(logPrintStream);
+			System.setErr(logPrintStream);
+		}
+		catch (FileNotFoundException e)
+		{
+			e.printStackTrace();
+		}
 
 		logger.info("loading predictor from " + modelPath);
 		Predictor predictor = new Predictor(modelPath, annotation);
 		predictor.setQuiet(false);
 
-		logger.info("loading docs from " + unlabeledData);
-		DocumentList docs = new DocumentList(new HashSet<String>(Arrays.asList(unlabeledData)));
-
-		logger.info("predicting...");
-		PredictionResult predicted = predictor.predict(docs);
-		List<? extends Comparable<?>> predictions = predicted.getPredictions();
-		for (int i = 0; i < docs.getSize(); i++)
+		if (unlabeledData != null)
 		{
-			String text = docs.getPrintableTextAt(i);
-			logger.info(predictions.get(i) + "\t" + text.substring(0, Math.min(100, text.length())));
-		}
+			logger.info("loading docs from " + unlabeledData);
+			DocumentList docs = new DocumentList(new HashSet<String>(Arrays.asList(unlabeledData)));
 
-		// Scanner input = new Scanner(System.in);
-		//
-		// while (input.hasNextLine())
-		// {
-		// String sentence = input.nextLine();
-		// String answer = predictor.prettyPredict(sentence);
-		// // actualOut.println(answer);
-		// logger.info(answer + "\t" + sentence.substring(0,
-		// Math.min(sentence.length(), 100)));
-		// }
+			logger.info("predicting...");
+			PredictionResult predicted = predictor.predict(docs);
+			List<? extends Comparable<?>> predictions = predicted.getPredictions();
+			for (int i = 0; i < docs.getSize(); i++)
+			{
+				String text = docs.getPrintableTextAt(i);
+//				logger.info(predictions.get(i) + "\t" + text.substring(0, Math.min(100, text.length())));
+				actualOut.println(i+"\t"+predictions.get(i) + "\t" + text.substring(0, Math.min(100, text.length())));
+			}
+		}
+		else
+		{
+			Scanner input = new Scanner(System.in);
+
+			while (input.hasNextLine())
+			{
+				String sentence = input.nextLine();
+				String answer = predictor.prettyPredict(sentence);
+				actualOut.println(answer);
+//				logger.info(answer + "\t" + sentence.substring(0, Math.min(sentence.length(), 100)));
+			}
+		}
 	}
 
 	public boolean isQuiet()
