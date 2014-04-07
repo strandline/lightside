@@ -2,11 +2,7 @@ package edu.cmu.side.recipe.converters;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Set;
-
-import plugins.features.BasicFeatures;
 
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -21,7 +17,6 @@ import edu.cmu.side.model.feature.Feature;
 import edu.cmu.side.model.feature.FeatureHit;
 import edu.cmu.side.model.feature.LocalFeatureHit;
 import edu.cmu.side.model.feature.LocalFeatureHit.HitLocation;
-import edu.cmu.side.plugin.FeatureFetcher;
 
 public class FeatureTableConverter implements Converter{
 

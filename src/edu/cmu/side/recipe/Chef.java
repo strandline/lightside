@@ -15,7 +15,6 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.Logger;
 
-import plugins.metrics.models.BasicModelEvaluations;
 import edu.cmu.side.control.BuildModelControl;
 import edu.cmu.side.model.OrderedPluginMap;
 import edu.cmu.side.model.Recipe;
@@ -46,7 +45,7 @@ public class Chef
 //	}
     
 	static boolean quiet = true;
-	static final protected Logger logger = Logger.getGlobal();
+	static final protected Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	static StatusUpdater textUpdater = new StatusUpdater()
 	{
@@ -270,9 +269,6 @@ public class Chef
 		{
 			TrainingResult trainingResult = recipe.getTrainingResult();
 			logger.info(trainingResult.getTextConfusionMatrix());
-			BasicModelEvaluations eval = new BasicModelEvaluations();
-			logger.info("Accuracy\t"+eval.getAccuracy(trainingResult));
-			logger.info("Kappa\t"+eval.getKappa(trainingResult));
 		}
 	}
 	
