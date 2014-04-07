@@ -47,7 +47,7 @@ public class ExtractFeaturesControl extends GenesisControl{
 	private static String targetAnnotation;
 	private static String selectedClassAnnotation;
 	private static Type selectedClassType;
-	protected static Logger logger = Logger.getGlobal();
+	protected static Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	static{
 		featurePlugins = new HashMap<FeaturePlugin, Boolean>();

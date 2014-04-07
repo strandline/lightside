@@ -58,7 +58,7 @@ public class BuildModelControl extends GenesisControl{
 	private static String newName = "model";
 	
 	private static boolean currentlyTraining = false;
-	protected static Logger logger = Logger.getGlobal();
+	protected static Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	static{
 		validationSettings = new TreeMap<String, Serializable>();

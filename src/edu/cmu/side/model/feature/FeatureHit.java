@@ -16,7 +16,7 @@ import edu.cmu.side.model.data.FeatureTable;
 public class FeatureHit implements Comparable<FeatureHit>, Serializable
 {
 	private static final long serialVersionUID = 1423521357321268667L;
-	protected static final Logger logger = Logger.getGlobal();
+	protected static final Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	/**
 	 * which feature hit here?

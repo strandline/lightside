@@ -80,6 +80,7 @@ public class ParallelTaskUpdater extends JPanel implements StatusUpdater
 		};
 		textLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
 		textLabel.setBackground(Color.WHITE);
+		textLabel.setMinimumSize(new Dimension(150, 20));
 		canvas.setBackground(Color.WHITE);
 		canvas.setSize(100, 20);
 		canvas.setMinimumSize(new Dimension(100, 20));
@@ -96,7 +97,7 @@ public class ParallelTaskUpdater extends JPanel implements StatusUpdater
 		super.setPreferredSize(d);
 		if(d.width > 200)
 		{
-			canvas.setPreferredSize(new Dimension(d.width, 20));
+			canvas.setPreferredSize(new Dimension(Math.min(d.width/2, d.width-150), 20));
 		}
 	}
 	

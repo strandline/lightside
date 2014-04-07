@@ -18,7 +18,7 @@ public abstract class SIDEPlugin implements Cloneable, Comparable<SIDEPlugin>
 	protected boolean halt;
 	private static boolean useSharedPluginsInDeserializedRecipes = true;
 	
-	protected final static Logger logger = Logger.getGlobal();
+	protected final static Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	private Map<String, String> aboutMap = new HashMap<String, String>();
 
