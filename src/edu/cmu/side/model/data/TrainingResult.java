@@ -18,8 +18,10 @@ import edu.cmu.side.model.feature.Feature;
  * @author emayfiel
  *
  */
-public class TrainingResult implements Serializable{
-
+public class TrainingResult implements Serializable
+{ 
+	//added for backwards-compatibility - change if the fields change!
+	private static final long serialVersionUID = -6746152451579063766L;
 	private String name;
 	private String longDescriptionString;
 	private FeatureTable train;

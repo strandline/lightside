@@ -17,6 +17,8 @@ public class LocalFeatureHit extends FeatureHit
 	
 	public static class HitLocation implements Serializable
 	{
+		//backwards compatible serial ID with current serialized models - change if this class changes!
+		private static final long serialVersionUID = -9160776027399318283L; 
 		private int start;
 		private int end;
 		private String column;
