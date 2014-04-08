@@ -1,16 +1,18 @@
 package edu.cmu.side.view.util;
 
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.TableModel;
 
+import org.apache.commons.io.output.FileWriterWithEncoding;
 
 public class CSVExporter
 {
@@ -59,9 +61,8 @@ public class CSVExporter
 	{
 		if (file != null)
 		{
-				//BufferedWriter bufferedWriter = new BufferedWriter(new FileWriterWithEncoding(file, Charset.forName("UTF-8")));
-				OutputStreamWriter outWriter = new OutputStreamWriter(new FileOutputStream(file), "UTF-8");
-				PrintWriter fileWriter = new PrintWriter(outWriter);
+				BufferedWriter bufferedWriter = new BufferedWriter(new FileWriterWithEncoding(file, Charset.forName("UTF-8")));
+				PrintWriter fileWriter = new PrintWriter(bufferedWriter);
 
 				int cols = model.getColumnCount();
 				for (int j = 0; j < cols; ++j)
