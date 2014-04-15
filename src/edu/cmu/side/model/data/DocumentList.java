@@ -13,6 +13,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 
 import com.yerihyo.yeritools.csv.CSVReader;
 
@@ -40,6 +41,8 @@ public class DocumentList implements Serializable
 	
 //	String[] annotationNames = null;
 	String[] labelArray = null;
+
+	protected final static Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	// wrap a list of unannotated plain-text instances as a DocumentList
 	public DocumentList(List<String> instances)
@@ -374,15 +377,18 @@ public class DocumentList implements Serializable
 			if(textName != null)
 				setTextColumn(textName, true);
 		}
+		String[] annotationNames = this.getAnnotationNames();
 		if(currentAnnotation == null || textColumns.isEmpty())
-			for (String s : this.getAnnotationNames())
+			for (String s : annotationNames)
 			{
 				Set<String> values = new TreeSet<String>();
 				double length = 0;
+				boolean isNumeric = true;
 				for (String t : this.getAnnotationArray(s))
 				{
 					values.add(t);
 					length += t.length();
+					
 				}
 				length = length/getSize();
 				if(currentAnnotation == null && values.size() > 1 && values.size() < (this.getSize() / 10.0))
@@ -395,6 +401,11 @@ public class DocumentList implements Serializable
 					this.setTextColumn(s, true);
 				}
 			}
+		if(currentAnnotation == null)
+		{
+			this.setCurrentAnnotation(annotationNames[0]);
+		}
+		
 		return currentAnnotation;
 	}
 
