@@ -65,11 +65,12 @@
         </java>
     </target>
 	
-	<target name="test" depends="run-tests,report-tests"/>
+	<!--<target name="test" depends="run-tests,report-tests"/>-->
+	<target name="test" depends="run-tests"/>
 	
     <target name="run-tests">
         <mkdir dir="${junit.output.dir}"/>
-        <junit fork="yes" printsummary="withOutAndErr">
+        <junit fork="yes" printsummary="true" haltonerror="true" haltonfailure="true" showoutput="false">
             <formatter type="xml"/>
         	
             <classpath refid="lightside.testpath"/>
