@@ -451,13 +451,31 @@ public class DocumentListTest extends TestCase{
 		Set<String> fileNames = new TreeSet<String>();
 		fileNames.add("Gallup.csv");
 		DocumentList dList = new DocumentList(fileNames);
-		dList.setTextColumn("text", true);
+		assertEquals(0, dList.getTextColumns().size());
 		assertNull(dList.currentAnnotation);
-		assertEquals(dList.getTextColumns().size(),1);
+		dList.setTextColumn("text", true);
+		dList.setCurrentAnnotation("Age");
+		assertEquals(1, dList.getTextColumns().size());
 		dList.guessTextAndAnnotationColumns();
-		assertEquals(dList.currentAnnotation, "Age");
+		assertEquals("Age", dList.currentAnnotation);
 		assertTrue(dList.getTextColumns().contains("text"));
 	}
+	
+
+	
+	@Test
+	public void testGuessAnnot(){
+		Set<String> fileNames = new TreeSet<String>();
+		fileNames.add("Gallup.csv");
+		DocumentList dList = new DocumentList(fileNames);
+		assertNull(dList.currentAnnotation);
+		assertEquals(0, dList.getTextColumns().size());
+		dList.guessTextAndAnnotationColumns();
+		assertEquals("Vote", dList.currentAnnotation);
+		assertEquals(1, dList.getTextColumns().size());
+		assertTrue(dList.getTextColumns().contains("text"));
+	}
+	
 	@Test
 	public void testAddAnnotationsUpdateExisting(){
 		Set<String> fileNames = new TreeSet<String>();
