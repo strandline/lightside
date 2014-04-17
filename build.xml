@@ -5,11 +5,11 @@
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.6"/>
     <property name="source" value="1.6"/>
-    <property name="ECLIPSE_HOME" value="/Applications/eclipse"/>
+    <!--<property name="ECLIPSE_HOME" value="/Applications/eclipse"/>-->
 	<!-- ECLIPSE_HOME is only used to reference where the junit JARs live - if your JUnit is elsewhere, you don't need this variable. -->
     <path id="junit.classpath">
-        <pathelement location="${ECLIPSE_HOME}/plugins/org.junit_4.11.0.v201303080030/junit.jar"/>
-        <pathelement location="${ECLIPSE_HOME}/plugins/org.hamcrest.core_1.3.0.v201303031735.jar"/>
+        <!--<pathelement location="${ECLIPSE_HOME}/plugins/org.junit_4.11.0.v201303080030/junit.jar"/>-->
+        <!--<pathelement location="${ECLIPSE_HOME}/plugins/org.hamcrest.core_1.3.0.v201303031735.jar"/>-->
     </path>
     <path id="lightside.classpath">
         <pathelement location="bin"/>
