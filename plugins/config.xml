@@ -12,6 +12,14 @@
         </classname>
     </plugin>
     -->
+    <!--<plugin>
+        <name>Hebrew Basic Features</name>
+        <author>David Adamson</author>
+        <version>0.2</version>
+        <description><![CDATA[Basic TagHelper-like Features]]></description>
+        <jarfile>hebrew.jar</jarfile>
+        <classname>edu.cmu.side.hebrew.plugins.HebrewFeatures</classname>
+    </plugin>-->
     <plugin>
         <name>Basic Features</name>
         <author>Elijah Mayfield</author>
