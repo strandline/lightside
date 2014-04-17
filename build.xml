@@ -70,7 +70,7 @@
 	
     <target name="run-tests">
         <mkdir dir="${junit.output.dir}"/>
-        <junit fork="yes" printsummary="true" haltonerror="true" haltonfailure="true" showoutput="false">
+        <junit fork="yes" printsummary="true" haltonerror="true" haltonfailure="true" showoutput="true">
             <formatter type="xml"/>
         	
             <classpath refid="lightside.testpath"/>
