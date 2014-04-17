@@ -81,7 +81,6 @@ public abstract class ParallelFeaturePlugin extends FeaturePlugin
 						{
 							if((index+1)%50 == 0 || index == size)
 							{
-								//logger.info("Thread "+threadIndex+": Extracting doc "+(index+1)+"/"+(offset+chunk)+" for "+pluginName);
 								synchronized(updater)
 								{updater.update("Extracting " + pluginName, index+1, size);}
 							}
@@ -95,14 +94,12 @@ public abstract class ParallelFeaturePlugin extends FeaturePlugin
 								
 							}
 							
-							//logger.info("Extracting doc "+index+" for "+ParallelFeaturePlugin.this.toString());
 							
 							Collection<FeatureHit> docHits = extractFeatureHitsFromDocument(documents, index);
-							//logger.info("Thread "+threadIndex+": Adding hits for doc "+index+".");
 							hits.addAll(docHits);
 						}
 					}
-					logger.info("Thread "+threadIndex + " complete.");
+					logger.fine("Thread "+threadIndex + " complete.");
 					if(updater instanceof ParallelTaskUpdater)
 					{
 						((ParallelTaskUpdater)updater).updateCompletion("Finished Extraction Thread", threadIndex, Completion.DONE);
@@ -118,7 +115,7 @@ public abstract class ParallelFeaturePlugin extends FeaturePlugin
 		}
 
 
-		logger.info("invoking "+tasks.size()+" tasks...");
+		logger.fine("invoking "+tasks.size()+" tasks...");
 		try
 		{
 			ExecutorService pool = ThreadPoolManager.getThreadPool();
@@ -129,11 +126,6 @@ public abstract class ParallelFeaturePlugin extends FeaturePlugin
 				allHits.addAll(result.get());
 			}
 			
-//			pool.shutdown();
-//			while(!pool.isShutdown())
-//			{
-//				Thread.sleep(50);
-//			}
 		}
 		catch (Exception ex)
 		{
@@ -144,7 +136,7 @@ public abstract class ParallelFeaturePlugin extends FeaturePlugin
 			
 		}
 		
-		logger.info(String.format("Parallel extraction complete in %.1f seconds.\n",(System.currentTimeMillis()-start)/1000.0));
+		logger.fine(String.format("Parallel extraction complete in %.1f seconds.\n",(System.currentTimeMillis()-start)/1000.0));
 		
 		updater.update(this+" Extraction complete.");
 		

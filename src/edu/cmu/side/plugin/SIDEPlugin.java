@@ -138,7 +138,7 @@ public abstract class SIDEPlugin implements Cloneable, Comparable<SIDEPlugin>
 	{
 		SIDEPlugin plugin;
 	
-		logger.info(new Date()+"\tSidePlugin: loading plugin "+pug+"...");
+		logger.fine(new Date()+"\tSidePlugin: loading plugin "+pug+"...");
 		
 		if(pug == null) 
 		{

@@ -85,9 +85,10 @@ public abstract class ParallelLearningPlugin extends LearningPlugin
 						((ParallelTaskUpdater)updater).updateCompletion("Starting fold", fold, Completion.STARTED);
 					}
 					
-					logger.info("ParallelLearningPlugin 57:\tstarting to validate fold "+fold);
+					
+					logger.finest("ParallelLearningPlugin 57:\tstarting to validate fold "+fold);
 					PredictionResult result = clonedLearner.validateFold(fold, table, foldsMap, numFolds, clonedWrappers, progressIndicator);
-					logger.info("ParallelLearningPlugin 59:\tdone validating fold "+fold);
+					logger.finest("ParallelLearningPlugin 59:\tdone validating fold "+fold);
 					
 					if(updater instanceof ParallelTaskUpdater)
 					{

@@ -46,6 +46,11 @@
         <delete dir="bin"/>
     </target>
     <target depends="clean" name="cleanall"/>
+	
+
+	<target name="build" depends="compile,test"/>
+	<target name="buildclean" depends="clean,compile,test"/>
+	
     <target depends="build-subprojects,build-project" name="compile"/>
     <target name="build-subprojects"/>
     <target depends="init" name="build-project">
