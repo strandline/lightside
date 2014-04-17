@@ -379,19 +379,21 @@ public class DocumentList implements Serializable
 		}
 		String[] annotationNames = this.getAnnotationNames();
 		if(currentAnnotation == null || textColumns.isEmpty())
+		{
 			for (String s : annotationNames)
 			{
 				Set<String> values = new TreeSet<String>();
 				double length = 0;
-				boolean isNumeric = true;
+				boolean missingValues = false;
 				for (String t : this.getAnnotationArray(s))
 				{
 					values.add(t);
 					length += t.length();
-					
+					if(t.equals(emptyAnnotationString))
+						missingValues = true;
 				}
 				length = length/getSize();
-				if(currentAnnotation == null && values.size() > 1 && values.size() < (this.getSize() / 10.0))
+				if(!missingValues && currentAnnotation == null && values.size() > 1 && (values.size() < (this.getSize() / 10.0)) || values.size() < 6)
 				{
 					this.setCurrentAnnotation(s);
 				}
@@ -401,6 +403,7 @@ public class DocumentList implements Serializable
 					this.setTextColumn(s, true);
 				}
 			}
+		}
 		if(currentAnnotation == null)
 		{
 			this.setCurrentAnnotation(annotationNames[0]);

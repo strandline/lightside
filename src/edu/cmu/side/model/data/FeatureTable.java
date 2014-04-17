@@ -388,17 +388,25 @@ public class FeatureTable implements Serializable
 
 	public Double getNumericConvertedClassValue(int i, String target)
 	{
+		String valueString = documents.getAnnotationArray(annotation).get(i);
 		if (getClassValueType() == Feature.Type.NUMERIC)
 		{
-			return Double.parseDouble(documents.getAnnotationArray(annotation).get(i));
+			try
+			{
+				return Double.parseDouble(valueString);
+			}
+			catch(NumberFormatException e)
+			{
+				return Double.NaN;
+			}
 		}
 		else if (getClassValueType() == Feature.Type.BOOLEAN)
 		{
-			return (documents.getAnnotationArray(annotation).get(i).equals(Boolean.TRUE.toString())) ? 1.0 : 0.0;
+			return (valueString.equals(Boolean.TRUE.toString())) ? 1.0 : 0.0;
 		}
 		else
 		{
-			return (documents.getAnnotationArray(annotation).get(i).equals(target)) ? 1.0 : 0.0;
+			return (valueString.equals(target)) ? 1.0 : 0.0;
 		}
 	}
 

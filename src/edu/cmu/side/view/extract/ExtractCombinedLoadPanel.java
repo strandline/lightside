@@ -27,6 +27,7 @@ import edu.cmu.side.view.util.AbstractListPanel;
 import edu.cmu.side.view.util.CheckBoxListEntry;
 import edu.cmu.side.view.util.FastListModel;
 import edu.cmu.side.view.util.SelectPluginList;
+import edu.cmu.side.view.util.WarningButton;
 
 public class ExtractCombinedLoadPanel extends AbstractListPanel
 {
@@ -38,6 +39,7 @@ public class ExtractCombinedLoadPanel extends AbstractListPanel
 	SelectPluginList textColumnsList = new SelectPluginList();
 	JScrollPane textColumnsScroll = new JScrollPane(textColumnsList);
 	JCheckBox differentiateBox = new JCheckBox("Differentiate Text Fields");
+	WarningButton warn = new WarningButton();
 
 	public ExtractCombinedLoadPanel(String s)
 	{	
@@ -56,6 +58,8 @@ public class ExtractCombinedLoadPanel extends AbstractListPanel
 		pan.add("br left", new JLabel("Type: "));
 		pan.add("hfill", classTypeCombo);
 		pan.add("br left", new JLabel("Text Fields:"));
+		pan.add("hfill", new JPanel());
+		pan.add("left", warn);
 		pan.add("br hfill", textColumnsScroll);
 		pan.add("br left", differentiateBox);
 		add(BorderLayout.SOUTH, pan);
@@ -151,6 +155,17 @@ public class ExtractCombinedLoadPanel extends AbstractListPanel
 		textColumnsList.setModel(model);
 	}
 
+
+	public void setWarning(String warnText)
+	{
+		warn.setWarning(warnText);;
+	}
+
+	public void clearWarning()
+	{
+		warn.clearWarning();
+	}
+	
 	public JComboBox getAnnotationFieldCombo()
 	{
 		return annotationFieldCombo;

@@ -242,7 +242,6 @@ public class RecipeExporter
 	{
 
 		if (!file.getName().endsWith(".csv")) file = new File(file.getAbsolutePath() + ".csv");
-		// Instances data = ft.getInstances();
 		FileWriter outf = new FileWriter(file);
 		outf.write("Instance");
 		DocumentList localDocuments = ft.getDocumentList();
@@ -279,7 +278,7 @@ public class RecipeExporter
 				{
 					if (f.getFeatureType() == Type.NUMERIC)
 					{
-						outf.write("," + 0);
+						outf.write(",");
 					}
 					else if (f.getFeatureType() == Type.BOOLEAN)
 					{

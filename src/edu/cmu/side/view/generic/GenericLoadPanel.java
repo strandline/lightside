@@ -21,7 +21,6 @@ import java.util.concurrent.ExecutionException;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -46,6 +45,7 @@ import edu.cmu.side.recipe.converters.ConverterControl;
 import edu.cmu.side.view.util.AbstractListPanel;
 import edu.cmu.side.view.util.JTreeUtil;
 import edu.cmu.side.view.util.RecipeExporter;
+import edu.cmu.side.view.util.WarningButton;
 
 public abstract class GenericLoadPanel extends AbstractListPanel
 {
@@ -53,7 +53,7 @@ public abstract class GenericLoadPanel extends AbstractListPanel
 
 	protected JPanel describePanel;
 	protected JLabel label;
-	protected JButton warn = new JButton("");
+	protected WarningButton warn = new WarningButton();
 	protected JFileChooser chooser;
 	protected JPanel buttons = new JPanel(new RiverLayout(0, 0));
 	JTree recipeTree;
@@ -163,21 +163,6 @@ public abstract class GenericLoadPanel extends AbstractListPanel
 		ImageIcon iconDelete = new ImageIcon("toolkits/icons/cross.png");
 		ImageIcon iconSave = new ImageIcon("toolkits/icons/disk.png");
 		ImageIcon iconLoad = new ImageIcon("toolkits/icons/folder_table.png");
-		ImageIcon iconWarn = new ImageIcon("toolkits/icons/error.png");
-		//TODO: replace with WarningButton utility class
-		warn.setIcon(iconWarn);
-		warn.setBorderPainted(false);
-		warn.setContentAreaFilled(false);
-		warn.setOpaque(false);
-		warn.addActionListener(new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent e)
-			{
-				JOptionPane.showMessageDialog(GenericLoadPanel.this, warn.getToolTipText(), "Warning", JOptionPane.WARNING_MESSAGE);
-			}
-		});
-		warn.setVisible(false);
 
 		delete.setText("");
 		delete.setIcon(iconDelete);
@@ -681,13 +666,12 @@ public abstract class GenericLoadPanel extends AbstractListPanel
 
 	public void setWarning(String warnText)
 	{
-		warn.setVisible(true);
-		warn.setToolTipText(warnText);
+		warn.setWarning(warnText);
 	}
 
 	public void clearWarning()
 	{
-		warn.setVisible(false);
+		warn.clearWarning();
 	}
 	
 	@Override

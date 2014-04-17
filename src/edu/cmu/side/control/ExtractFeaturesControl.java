@@ -192,12 +192,16 @@ public class ExtractFeaturesControl extends GenesisControl{
 							sdl.setTextColumn(annot, false);
 						}
 
-//						sdl.setCurrentAnnotation(annot); 
+						if(sdl.getPossibleAnn(annot).contains(sdl.getEmptyAnnotationString()))
+						{
+							parentComponent.setWarning("The column you've picked for the class has missing values.\nPlease correct your data file or pick another column.");
+						}
+						else
+						{
+							parentComponent.clearWarning();
+						}
+						
 						setSelectedClassAnnotation(annot);
-						// because this modifies a recipe, should it
-						// notify the recipe manager?
-
-//						sdl.setClassValueType(null);
 						Type valueType = sdl.getValueType(annot);
 						classTypeCombo.setSelectedItem(valueType);
 						setSelectedClassType(valueType);
@@ -401,7 +405,6 @@ public class ExtractFeaturesControl extends GenesisControl{
 
 	public static void setSelectedClassAnnotation(String selectedClassAnnotation)
 	{
-		
 		ExtractFeaturesControl.selectedClassAnnotation = selectedClassAnnotation;
 	}
 }
