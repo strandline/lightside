@@ -1,13 +1,10 @@
 package edu.cmu.side.plugin;
 
-import java.io.IOException;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.cmu.side.model.Recipe;
 import edu.cmu.side.model.RecipeManager.Stage;
-import edu.cmu.side.model.data.FeatureTable;
 import edu.cmu.side.recipe.Chef;
 import edu.cmu.side.recipe.converters.ConverterControl;
 
