@@ -31,7 +31,8 @@ public class ImportController {
 		return foundParser;
 	}
 	
-	public static DocumentList makeDocumentList(Set<String> fileNames, Charset encoding) throws Exception, IOException, FileNotFoundException{
+	public static DocumentList makeDocumentList(Set<String> fileNames, Charset encoding) throws Exception, IOException, FileNotFoundException
+	{
 		if(fileNames.size()==0) return null;
 		
 		String nameBuilder = "";
