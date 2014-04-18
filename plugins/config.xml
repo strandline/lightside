@@ -7,7 +7,12 @@
 		<version>1.0</version>
 		<description>Build DocumentList From CSV file></description>
 		<jarfile>genesis.jar</jarfile>
-		<classname>pluginLightSide.app
+		<classname>plugins.input.CSVParser</classname>
+	</plugin>
+	
+    <!--FeaturePlugin-->
+    <!--     <plugin>
+		<name>Example Features</name>
 		<author>Your Fine Self</author>
 		<version>0.1</version>
 		<description>Example of a FeaturePlugin</description>
