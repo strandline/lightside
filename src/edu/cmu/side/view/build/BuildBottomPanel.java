@@ -92,7 +92,7 @@ public class BuildBottomPanel extends AbstractListPanel {
 		confusion.setPreferredSize(new Dimension(275,200));
 		result.setPreferredSize(new Dimension(350, 200));
 		
-		Dimension minimumSize = new Dimension(50, 200);
+		Dimension minimumSize = new Dimension(50, 50);
 		control.setMinimumSize(minimumSize);
 		confusion.setMinimumSize(minimumSize);
 		result.setMinimumSize(minimumSize);
