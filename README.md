@@ -1,4 +1,4 @@
-![LightSide](http://ankara.lti.cs.cmu.edu/side/lightside_research_title.png "LightSide")
+<img src="http://ankara.lti.cs.cmu.edu/side/lightside_research_title.png" width="200px" />
 
 LightSide Researcher's Workbench is an open-source text-mining tool released under the GNU General Public License. 
 To download the latest public release, visit [http://ankara.lti.cs.cmu.edu/side](http://ankara.lti.cs.cmu.edu/side)
