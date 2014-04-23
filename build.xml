@@ -5,6 +5,7 @@
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.6"/>
     <property name="source" value="1.6"/>
+    <property name="lightside.location" value="."/>
     <!--<property name="ECLIPSE_HOME" value="/Applications/eclipse"/>-->
 	<!-- ECLIPSE_HOME is only used to reference where the junit JARs live - if your JUnit is elsewhere, you don't need this variable. -->
     <path id="junit.classpath">
@@ -48,12 +49,9 @@
     <target depends="clean" name="cleanall"/>
 	
 
-	<target name="build" depends="compile,test"/>
-	<target name="buildclean" depends="clean,compile,test"/>
+	<target name="build" depends="clean,compile,test"/>
 	
-    <target depends="build-subprojects,build-project" name="compile"/>
-    <target name="build-subprojects"/>
-    <target depends="init" name="build-project">
+    <target depends="init" name="compile">
         <echo message="${ant.project.name}: ${ant.file}"/>
         <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
             <src path="src"/>
@@ -75,7 +73,7 @@
 	
     <target name="run-tests">
         <mkdir dir="${junit.output.dir}"/>
-        <junit fork="yes" printsummary="true" haltonerror="true" haltonfailure="true" showoutput="true">
+        <junit fork="yes" printsummary="true" haltonerror="true" haltonfailure="true" showoutput="true" dir="${lightside.location}">
             <formatter type="xml"/>
         	
             <classpath refid="lightside.testpath"/>
