@@ -94,7 +94,7 @@ public class TestSetLoadPanel extends GenericLoadCSVPanel
 				}
 				else if(!testAnnotations.contains(annotation) && ! testText.contains(annotation))
 				{
-					setWarning("This test set does not have the '"+annotation+ "' label you're training on.");
+					setWarning("This test set does not have a column for your class annotation, '"+annotation+ "'.");
 					return false;
 				}
 				else
