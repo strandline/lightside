@@ -132,7 +132,7 @@ public abstract class ParallelFeaturePlugin extends FeaturePlugin
 			// TODO Auto-generated catch block
 			ex.printStackTrace();
 			
-			throw new RuntimeException("Feature Extraction Failed", ex);
+			throw new RuntimeException("Feature Extraction Failed: "+ex.getMessage(), ex);
 			
 		}
 		

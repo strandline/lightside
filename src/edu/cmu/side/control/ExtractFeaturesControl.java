@@ -337,8 +337,7 @@ public class ExtractFeaturesControl extends GenesisControl{
 			}
 			catch (Exception e)
 			{
-				// JOptionPane.showMessageDialog(null,
-				// "LightSide couldn't finalize the feature table.\nSee lightsidelog.log for more details.\n"+e.getLocalizedMessage(),"Extraction Failure",JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null, "Couldn't finish the feature table.\nSee lightside_log for more details.\n"+e.getLocalizedMessage(),"Feature Failure",JOptionPane.ERROR_MESSAGE);
 				System.err.println("Feature Extraction Failed");
 				e.printStackTrace();
 				ex = e;

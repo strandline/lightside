@@ -75,7 +75,7 @@ public class FeatureHit implements Comparable<FeatureHit>, Serializable
 	{
 		if(   !feature.getFeatureType().getClassForType().isInstance(value) 
 			|| feature.getFeatureType() == Feature.Type.NOMINAL && !feature.getNominalValues().contains(value))
-			throw new IllegalArgumentException(value+" is not a legal value for the "+feature.getFeatureType()+" feature "+feature+"\n"+feature.getNominalValues());
+			throw new IllegalArgumentException(value+" is not an expected value for the "+feature.getFeatureType()+" feature "+feature);
 
 		this.value = value;
 	}

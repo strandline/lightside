@@ -83,12 +83,16 @@ public class TestSetLoadPanel extends GenericLoadCSVPanel
 			else
 			{
 				String annotation = trainRecipe.getTrainingTable().getAnnotation();
-				if(!testList.allAnnotations().keySet().containsAll(trainList.getTextColumns()))
+				
+				Set<String> trainText = trainList.getTextColumns();
+				Set<String> testAnnotations = testList.allAnnotations().keySet();
+				Set<String> testText = testList.getTextColumns();
+				if(!testAnnotations.containsAll(trainText) && !testText.containsAll(trainText))
 				{
-					setWarning("This test set does not have the same text columns '"+trainList.getTextColumns()+ "' as your training data.");
+					setWarning("This test set does not have the same text columns '"+trainText+ "' as your training data.");
 					return false;
 				}
-				else if(!testList.allAnnotations().keySet().contains(annotation))
+				else if(!testAnnotations.contains(annotation) && ! testText.contains(annotation))
 				{
 					setWarning("This test set does not have the '"+annotation+ "' label you're training on.");
 					return false;
