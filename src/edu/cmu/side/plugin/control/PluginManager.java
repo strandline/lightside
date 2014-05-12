@@ -2,17 +2,21 @@ package edu.cmu.side.plugin.control;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import oracle.xml.parser.v2.DOMParser;
 import oracle.xml.parser.v2.XMLDocument;
+import oracle.xml.parser.v2.XMLParseException;
 
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
-import com.mysterion.xml.XMLBoss;
 import com.yerihyo.yeritools.collections.MapToolkit.ListValueMap;
 import com.yerihyo.yeritools.debug.YeriDebug;
 import com.yerihyo.yeritools.io.FileToolkit;
@@ -93,6 +97,28 @@ public class PluginManager {
 		return "PluginWrapper Manager";
 	}
 	
+	private static XMLDocument XMLFromFile(File configFile) throws XMLParseException, SAXException, MalformedURLException, IOException
+	{
+        // Get an instance of the parser
+        DOMParser parser = new DOMParser();
+
+		//Generate a URL from the filename.
+		URI url = configFile.toURI();
+
+        // Set various parser options: validation on,
+        // warnings shown, error stream set to stderr.
+        parser.setErrorStream(System.err);
+        //parser.setValidationMode(DTD_validation);
+        parser.showWarnings(true);
+
+        //Parse the document.
+        parser.parse(url.toURL());
+
+        // Obtain the document.
+        XMLDocument doc = parser.getDocument();
+        return doc;
+	}
+	
 	private static Collection<PluginWrapper> createPluginOfFolder(File rootFolder, StringBuilder errorComment){
 		List<PluginWrapper> pluginList = new ArrayList<PluginWrapper>();
 		
@@ -102,8 +128,8 @@ public class PluginManager {
 		
 		XMLDocument config = null;
 		try {
-			config = XMLBoss.XMLFromFile(configFile);
-		} catch (IOException e) {
+			config = XMLFromFile(configFile);//XMLBoss.XMLFromFile(configFile);
+		} catch (Exception e) {
 			errorComment.append(e.getMessage());
 			return null;
 		}
