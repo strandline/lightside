@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import com.yerihyo.yeritools.math.StatisticsToolkit;
 
 import edu.cmu.side.control.BuildModelControl;
 import edu.cmu.side.model.OrderedPluginMap;
@@ -220,9 +219,6 @@ public abstract class LearningPlugin extends SIDEPlugin implements Serializable
 		{
 			throw new Exception("User Canceled");
 		}
-
-//		double average = StatisticsToolkit.getAverage(times);
-//		double timeA = System.currentTimeMillis();
 
 		
 		FeatureTable wrappedTrain = table;
