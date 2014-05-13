@@ -398,6 +398,8 @@ public class Predictor
 //				logger.info(answer + "\t" + sentence.substring(0, Math.min(sentence.length(), 100)));
 			}
 		}
+
+		System.exit(0);
 	}
 
 	public boolean isQuiet()
