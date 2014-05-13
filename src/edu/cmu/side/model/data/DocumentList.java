@@ -648,7 +648,7 @@ public class DocumentList implements Serializable
 			}
 			else if (!allAnnotations.containsKey(name))
 			{
-				throw new IllegalStateException("Can't find the text column named " + name + " in provided file");
+				throw new IllegalStateException("There is no text column named '" + name + "' in this data set.");
 			}
 			else
 			{
