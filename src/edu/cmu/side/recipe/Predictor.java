@@ -3,12 +3,14 @@ package edu.cmu.side.recipe;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
@@ -19,6 +21,7 @@ import edu.cmu.side.model.StatusUpdater;
 import edu.cmu.side.model.data.DocumentList;
 import edu.cmu.side.model.data.FeatureTable;
 import edu.cmu.side.model.data.PredictionResult;
+import edu.cmu.side.plugin.control.ImportController;
 
 /**
  * loads a model trained using lightSIDE uses it to label new instances.
@@ -89,28 +92,6 @@ public class Predictor
 
 		loadModel();
 	}
-
-	// @Deprecated //nobody calls this?
-	// protected FeatureTable prepareTestSet(DocumentList test)
-	// {
-	// test.setLabelArray(recipe.getTrainingTable().getLabelArray());
-	//
-	// Collection<FeatureHit> hits = new TreeSet<FeatureHit>();
-	// OrderedPluginMap extractors = recipe.getExtractors();
-	// for (SIDEPlugin plug : extractors.keySet())
-	// {
-	// Collection<FeatureHit> extractorHits = ((FeaturePlugin)
-	// plug).extractFeatureHits(test, extractors.get(plug), textUpdater);
-	// hits.addAll(extractorHits);
-	// }
-	// FeatureTable ft = new FeatureTable(test, hits, 0);
-	// for (SIDEPlugin plug : recipe.getFilters().keySet())
-	// {
-	// ft = ((RestructurePlugin) plug).filterTestSet(recipe.getTrainingTable(),
-	// ft, recipe.getFilters().get(plug), textUpdater);
-	// }
-	// return ft;
-	// }
 
 	/**
 	 * 
@@ -216,14 +197,6 @@ public class Predictor
 			double wordLength = docs.getPrintableTextAt(i).split("\\s+").length;
 			lengthStats.addValue(wordLength);
 		}
-
-		// Map<String, Double> statsMap = new HashMap<String, Double>();
-		// statsMap.put("hitCountAvg", hitStats.getMean());
-		// statsMap.put("hitCountDev", hitStats.getStandardDeviation());
-		// statsMap.put("hitDensityAvg", densityStats.getMean());
-		// statsMap.put("hitDensityDev", densityStats.getStandardDeviation());
-		// statsMap.put("wordCountAvg", lengthStats.getMean());
-		// statsMap.put("wordCountDev", lengthStats.getStandardDeviation());
 
 		logger.info("Feature Density Mean: " + densityStats.getMean());
 		logger.info("Feature Density Deviation: " + densityStats.getStandardDeviation());
@@ -341,16 +314,15 @@ public class Predictor
 	public static void main(String[] args) throws Exception
 	{
 		String modelPath = "saved/bayes.model.side";
-		if (args.length < 1)
+		if (args.length < 1 || args.length == 2)
 		{
-			System.err.println("usage: predict.sh path/to/saved/model.xml [path/to/unlabeled/data.csv]");
+			printUsage();
+			System.exit(1);
 		}
 		else
 			modelPath = args[0];
 
 		String annotation = "predicted";
-		String unlabeledData = null;
-		if (args.length > 1) unlabeledData = args[1];
 
 		// to swallow all output except for the classifications
 		PrintStream actualOut = System.out;
@@ -367,14 +339,23 @@ public class Predictor
 			e.printStackTrace();
 		}
 
+		try
+		{
 		logger.info("loading predictor from " + modelPath);
 		Predictor predictor = new Predictor(modelPath, annotation);
-		predictor.setQuiet(false);
 
-		if (unlabeledData != null)
+		if (args.length > 2)
 		{
-			logger.info("loading docs from " + unlabeledData);
-			DocumentList docs = new DocumentList(new HashSet<String>(Arrays.asList(unlabeledData)));
+			Set<String> corpusFiles = new HashSet<String>();
+
+			for (int i = 2; i < args.length; i++)
+			{
+				corpusFiles.add(args[i]);
+			}
+			
+			Charset encoding = Charset.forName(args[1]);
+			logger.info("loading docs from " + corpusFiles);
+			DocumentList docs = ImportController.makeDocumentList(corpusFiles, encoding);
 
 			logger.info("predicting...");
 			PredictionResult predicted = predictor.predict(docs);
@@ -400,6 +381,25 @@ public class Predictor
 		}
 
 		System.exit(0);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace(actualOut);
+			if(e.getCause() != null)
+			{
+				actualOut.println("Caused by");
+				e.getCause().printStackTrace(actualOut);
+			}
+		}
+	}
+
+	public static void printUsage()
+	{
+		System.out.println("Usage: ./scripts/predict.sh path/to/saved/model.xml [{data-encoding} path/to/unlabeled/data.csv...]");
+		System.out.println("Outputs tab-separated predictions for new instances, using the given model.");
+		System.out.println("If no new data file is given, instances are read from the standard input.");
+		System.out.println("Common data encodings are UTF-8, windows-1252, and MacRoman.");
+		System.out.println("Make sure that the text columns and any columns used as features have the same names in the new data as they did in the training set.)");
 	}
 
 	public boolean isQuiet()

@@ -6,9 +6,12 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryUsage;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -28,8 +31,10 @@ import edu.cmu.side.model.feature.FeatureHit;
 import edu.cmu.side.plugin.FeaturePlugin;
 import edu.cmu.side.plugin.RestructurePlugin;
 import edu.cmu.side.plugin.SIDEPlugin;
+import edu.cmu.side.plugin.control.ImportController;
 import edu.cmu.side.recipe.converters.ConverterControl;
 import edu.cmu.side.recipe.converters.ConverterControl.RecipeFileFormat;
+import edu.cmu.side.view.util.RecipeExporter;
 
 /**
  * loads a model trained using LightSide and uses it to label new instances.
@@ -38,12 +43,13 @@ import edu.cmu.side.recipe.converters.ConverterControl.RecipeFileFormat;
  */
 public class Chef
 {
-//	static
-//	{
-//		System.setProperty("java.awt.headless", "true");
-//		logger.info(java.awt.GraphicsEnvironment.isHeadless() ? "Running in headless mode." : "Not actually headless");
-//	}
-    
+	// static
+	// {
+	// System.setProperty("java.awt.headless", "true");
+	// logger.info(java.awt.GraphicsEnvironment.isHeadless() ?
+	// "Running in headless mode." : "Not actually headless");
+	// }
+
 	static boolean quiet = true;
 	static final protected Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
@@ -53,15 +59,13 @@ public class Chef
 		@Override
 		public void update(String updateSlot, int slot1, int slot2)
 		{
-			if(!quiet)
-				logger.info(updateSlot+": "+slot1 + "/"+slot2);
+			if (!quiet) logger.info(updateSlot + ": " + slot1 + "/" + slot2);
 		}
 
 		@Override
 		public void update(String update)
 		{
-			if(!quiet)
-				logger.info(update);	
+			if (!quiet) logger.info(update);
 		}
 
 		@Override
@@ -72,21 +76,21 @@ public class Chef
 		}
 	};
 
-	//Extract Features
+	// Extract Features
 	protected static void simmerFeatures(Recipe recipe, int threshold, String annotation, Type type)
-	{		
+	{
 		final DocumentList corpus = recipe.getDocumentList();
 		final OrderedPluginMap extractors = recipe.getExtractors();
 		final ConcurrentSkipListSet<String> hitChunks = new ConcurrentSkipListSet<String>();
 		final Collection<FeatureHit> hits = new TreeSet<FeatureHit>();
-		
+
 		for (final SIDEPlugin plug : extractors.keySet())
 		{
 
-					if(!quiet) logger.info("Chef: Simmering features with "+plug+"...");
-					//logger.info("Extractor Settings: "+extractors.get(plug));
-					Collection<FeatureHit> extractorHits = ((FeaturePlugin) plug).extractFeatureHits(corpus, extractors.get(plug), textUpdater);
-					hits.addAll(extractorHits);
+			if (!quiet) logger.info("Chef: Simmering features with " + plug + "...");
+			// logger.info("Extractor Settings: "+extractors.get(plug));
+			Collection<FeatureHit> extractorHits = ((FeaturePlugin) plug).extractFeatureHits(corpus, extractors.get(plug), textUpdater);
+			hits.addAll(extractorHits);
 
 			if (!quiet) logger.info("Chef: Finished simmering with " + plug + "...");
 		}
@@ -99,45 +103,48 @@ public class Chef
 		recipe.setFeatureTable(ft);
 
 		if (!quiet) logger.info("Chef: Done building feature table!");
-		if(recipe.getStage().compareTo(Stage.MODIFIED_TABLE) >= 0) //recipe includes filtering
+		if (recipe.getStage().compareTo(Stage.MODIFIED_TABLE) >= 0) // recipe
+																	// includes
+																	// filtering
 		{
 			for (SIDEPlugin plug : recipe.getFilters().keySet())
 			{
-				if(!quiet) logger.info("Restructuring features with "+plug+"...");
+				if (!quiet) logger.info("Restructuring features with " + plug + "...");
 				ft = ((RestructurePlugin) plug).restructure(recipe.getTrainingTable(), recipe.getFilters().get(plug), threshold, textUpdater);
 			}
 			recipe.setFilteredTable(ft);
 		}
-		ft.setName(recipe.getRecipeName()+" features");
+		ft.setName(recipe.getRecipeName() + " features");
 	}
 
-	public static Recipe followSimmerSteps(Recipe originalRecipe, DocumentList corpus, Stage finalStage, int newThreshold){
+	public static Recipe followSimmerSteps(Recipe originalRecipe, DocumentList corpus, Stage finalStage, int newThreshold)
+	{
 		Recipe newRecipe = Recipe.copyEmptyRecipe(originalRecipe);
 
 		prepareDocumentList(originalRecipe, corpus);
 		newRecipe.setDocumentList(corpus);
 		printMemoryUsage();
-		
-		if(finalStage == Stage.DOCUMENT_LIST)
-			return newRecipe;
+
+		if (finalStage == Stage.DOCUMENT_LIST) return newRecipe;
 
 		String annotation = originalRecipe.getAnnotation();
 
-		if(!corpus.allAnnotations().containsKey(annotation))
-			annotation = null;
+		if (!corpus.allAnnotations().containsKey(annotation)) annotation = null;
 
 		simmerFeatures(newRecipe, newThreshold, annotation, originalRecipe.getClassValueType());
 
 		return newRecipe;
 	}
 
-	public static Recipe followRecipeWithTestSet(Recipe originalRecipe, DocumentList corpus, DocumentList testSet, Stage finalStage, int newThreshold) throws Exception{
+	public static Recipe followRecipeWithTestSet(Recipe originalRecipe, DocumentList corpus, DocumentList testSet, Stage finalStage, int newThreshold)
+			throws Exception
+	{
 		Recipe newRecipe = followSimmerSteps(originalRecipe, corpus, finalStage, newThreshold);
 
 		Map<String, Serializable> validationSettings = new TreeMap<String, Serializable>();
 		validationSettings.put("test", Boolean.TRUE);
 		validationSettings.put("type", "SUPPLY");
-		
+
 		// Creates a reconciled test set feature table.
 		validationSettings = BuildModelControl.prepareDocuments(newRecipe, validationSettings, testSet);
 
@@ -147,13 +154,12 @@ public class Chef
 		return newRecipe;
 	}
 
-	//TODO: be more consistent in parameters to recipe stages
+	// TODO: be more consistent in parameters to recipe stages
 	public static Recipe followRecipe(Recipe originalRecipe, DocumentList corpus, Stage finalStage, int newThreshold) throws Exception
 	{
 		Recipe newRecipe = followSimmerSteps(originalRecipe, corpus, finalStage, newThreshold);
 
-		if(finalStage.compareTo(Stage.TRAINED_MODEL) < 0)
-			return newRecipe;
+		if (finalStage.compareTo(Stage.TRAINED_MODEL) < 0) return newRecipe;
 
 		broilModel(newRecipe);
 		printMemoryUsage();
@@ -161,15 +167,17 @@ public class Chef
 	}
 
 	/**
-	 * Build model and update recipe settings to include the new classifier. 
+	 * Build model and update recipe settings to include the new classifier.
+	 * 
 	 * @param newRecipe
 	 * @throws Exception
 	 */
-	//Build Model
+	// Build Model
 	protected static Recipe broilModel(Recipe newRecipe) throws Exception
 	{
-		if(!quiet) logger.info("Training model with "+newRecipe.getLearner()+"...");
-		TrainingResult trainResult = newRecipe.getLearner().train(newRecipe.getTrainingTable(), newRecipe.getLearnerSettings(), newRecipe.getValidationSettings(), newRecipe.getWrappers(), textUpdater);
+		if (!quiet) logger.info("Training model with " + newRecipe.getLearner() + "...");
+		TrainingResult trainResult = newRecipe.getLearner().train(newRecipe.getTrainingTable(), newRecipe.getLearnerSettings(),
+				newRecipe.getValidationSettings(), newRecipe.getWrappers(), textUpdater);
 		newRecipe.setTrainingResult(trainResult);
 		newRecipe.setLearnerSettings(newRecipe.getLearner().generateConfigurationSettings());
 		return newRecipe;
@@ -181,17 +189,17 @@ public class Chef
 	 */
 	protected static void prepareDocumentList(Recipe originalRecipe, DocumentList corpus)
 	{
-		if(!quiet) logger.info("Preparing documents...");
+		if (!quiet) logger.info("Preparing documents...");
 		DocumentList original = originalRecipe.getDocumentList();
 		FeatureTable originalTable = originalRecipe.getTrainingTable();
 		String currentAnnotation = originalTable.getAnnotation();
-		if(corpus.allAnnotations().containsKey(currentAnnotation))
+		if (corpus.allAnnotations().containsKey(currentAnnotation))
 		{
 			corpus.setCurrentAnnotation(currentAnnotation, originalRecipe.getClassValueType());
 		}
 		else
 		{
-			//System.err.println("Warning: data has no "+currentAnnotation+" annotation. You can't train a new model on this data (only predict)");
+			// System.err.println("Warning: data has no "+currentAnnotation+" annotation. You can't train a new model on this data (only predict)");
 		}
 		corpus.setLabelArray(originalRecipe.getLabelArray());
 		corpus.setTextColumns(new HashSet<String>(originalRecipe.getTextColumns()));
@@ -203,7 +211,6 @@ public class Chef
 		return ConverterControl.loadRecipe(recipePath);
 	}
 
-
 	public static void saveRecipe(Recipe recipe, File target, RecipeFileFormat exportFormat) throws IOException
 	{
 		ConverterControl.writeRecipeToFile(target.getPath(), recipe, exportFormat);
@@ -211,46 +218,81 @@ public class Chef
 
 	public static void main(String[] args) throws Exception
 	{
-		
 		String recipePath, outPath;
-		if (args.length < 2)
+		if (args.length < 5 || !Arrays.asList("predict", "full").contains(args[0]))
 		{
-			System.err.println("usage: chef.sh saved/template.model.side saved/new.model.side data.csv...");
-			return;
-		}
-		
-		recipePath = args[0];
-		outPath = args[1];
-
-		Set<String> corpusFiles = new HashSet<String>();
-
-		String dataFile = "data/MovieReviews.csv";
-		if (args.length < 3) corpusFiles.add(dataFile);
-		else for(int i = 2; i < args.length; i++)
-		{
-			corpusFiles.add(args[i]);
+			printUsage();
+			System.exit(1);
 		}
 
-		if(!quiet) logger.info("Loading "+recipePath);
-		Recipe recipe = loadRecipe(recipePath);
-		printMemoryUsage();
-
-		if(!quiet) logger.info("Loading documents: "+corpusFiles);
-		Recipe result = followRecipe(recipe, new DocumentList(corpusFiles), recipe.getStage(), recipe.getFeatureTable().getThreshold());
-		
-		if(result.getStage().compareTo(Stage.TRAINED_MODEL) >= 0)
+		try
 		{
-			displayTrainingResults(result);
-		}
 
-		logger.info("Saving finished recipe to "+outPath);
-		saveRecipe(result, new File(outPath), RecipeFileFormat.XML);
+			recipePath = args[2];
+			outPath = args[3];
+			boolean predictOnly = args[0].equals("predict");
+			Charset encoding = Charset.forName(args[1]);
+
+			Set<String> corpusFiles = new HashSet<String>();
+
+			for (int i = 4; i < args.length; i++)
+			{
+				corpusFiles.add(args[i]);
+			}
+
+			if (!quiet) logger.info("Loading " + recipePath);
+			Recipe recipe = loadRecipe(recipePath);
+
+			if (!quiet) logger.info("Loading documents: " + corpusFiles);
+			DocumentList newDocs = ImportController.makeDocumentList(corpusFiles, encoding);
+			Recipe result = followRecipe(recipe, newDocs, recipe.getStage(), recipe.getFeatureTable().getThreshold());
+
+			if (result.getStage().compareTo(Stage.TRAINED_MODEL) >= 0)
+			{
+				displayTrainingResults(result);
+			}
+			
+			result.setRecipeName(new File(args[4]).getName()+" Model");
+
+			if(!outPath.toLowerCase().endsWith(".xml"))
+			{
+				outPath += predictOnly?".predict.xml":".xml";
+			}
+
+			logger.info("Saving finished recipe to " + outPath);
+			if (predictOnly)
+			{
+				Recipe predict = Recipe.copyPredictionRecipe(result);
+				saveRecipe(predict, new File(outPath), RecipeFileFormat.XML);
+			}
+			else
+				saveRecipe(result, new File(outPath), RecipeFileFormat.XML);
+
+			System.exit(0);
+
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			System.out.println("\n****");
+			printUsage();
+			System.exit(1);
+		}
+	}
+
+	public static void printUsage()
+	{
+		System.err.println("Usage: scripts/train.sh {full|predict} {data-encoding} saved/template.model.xml saved/new.model.xml data.csv...");
+		System.out.println("Follows a trained model template on a new data set.");
+		System.out.println("Model can be saved in full (for error analysis), or in a prediction-only format.");
+		System.out.println("Common data encodings are UTF-8, windows-1252, and MacRoman.");
+		System.out.println("(Make sure that the text columns, class column, and any columns used as features have the same names in the new data as they did for the template.)");
 	}
 
 	protected static void printMemoryUsage()
 	{
-		if(quiet) return;
-		
+		if (quiet) return;
+
 		double gigs = 1024 * 1024 * 1024;
 		MemoryUsage usage = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage();
 
@@ -265,13 +307,17 @@ public class Chef
 	 */
 	protected static void displayTrainingResults(Recipe recipe)
 	{
-		if(recipe.getStage().compareTo(Stage.TRAINED_MODEL) >= 0)
+		if (recipe.getStage().compareTo(Stage.TRAINED_MODEL) >= 0)
 		{
 			TrainingResult trainingResult = recipe.getTrainingResult();
 			logger.info(trainingResult.getTextConfusionMatrix());
+			for (Entry<String, String> eval : trainingResult.getCachedEvaluations().entrySet())
+			{
+				System.out.println(eval.getKey() + ":\t" + eval.getValue());
+			}
 		}
 	}
-	
+
 	public static void setQuiet(boolean b)
 	{
 		quiet = b;

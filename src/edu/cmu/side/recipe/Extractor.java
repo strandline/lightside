@@ -31,7 +31,7 @@ public class Extractor extends Chef
 	{
 		List<String> exportOptions = Arrays.asList("arff", "csv", "xml");
 		String recipePath, outPath;
-		if (args.length < 5 || !exportOptions.contains(args[2]))
+		if (args.length < 5 || !exportOptions.contains(args[0]))
 		{
 			printUsage();
 			System.exit(0);
@@ -39,10 +39,10 @@ public class Extractor extends Chef
 
 		try
 		{
-			recipePath = args[0];
-			outPath = args[1];
+			recipePath = args[2];
+			outPath = args[3];
 			
-			Charset encoding = Charset.forName(args[3]);
+			Charset encoding = Charset.forName(args[1]);
 			Set<String> corpusFiles = new HashSet<String>();
 
 			for (int i = 4; i < args.length; i++)
@@ -60,9 +60,9 @@ public class Extractor extends Chef
 			File firstDoc = new File(args[4]);
 			result.setRecipeName(firstDoc.getName()+" Features");
 
-			if(!outPath.toLowerCase().endsWith(args[2]))
+			if(!outPath.toLowerCase().endsWith(args[0]))
 			{
-				outPath += "."+args[2];
+				outPath += "."+args[0];
 			}
 			
 			System.out.println("Saving finished feature table to " + outPath);
@@ -70,12 +70,12 @@ public class Extractor extends Chef
 			File outFile = new File(outPath);
 			FeatureTable trainingTable = result.getTrainingTable();
 			
-			System.out.println("Saving in "+args[2]+" format.");
-			if(args[2].equals("arff"))
+			System.out.println("Saving in "+args[0]+" format.");
+			if(args[0].equals("arff"))
 			{
 				RecipeExporter.exportToARFF(trainingTable, outFile);
 			}
-			else if(args[2].equals("csv"))
+			else if(args[0].equals("csv"))
 			{
 				RecipeExporter.exportToCSV(trainingTable, outFile);
 			}
@@ -89,7 +89,7 @@ public class Extractor extends Chef
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			System.out.println("****");
+			System.out.println("\n****");
 			printUsage();
 			System.exit(1);
 		}
@@ -97,8 +97,9 @@ public class Extractor extends Chef
 
 	public static void printUsage()
 	{
-		System.out.println("Usage: ./extract.sh path/to/template.xml path/to/output/table {arff|csv|xml} {data-encoding} path/to/data.csv");
+		System.out.println("Usage: ./extract.sh {arff|csv|xml} {data-encoding} path/to/template.xml path/to/output/table path/to/data.csv...");
 		System.out.println("Extracts a new feature table with the same extraction settings as template.xml (any saved LightSide feature table or model)");
+		System.out.println("Feature table can be saved in ARFF, CSV, or LightSide XML formats.");
 		System.out.println("Common data encodings are UTF-8, windows-1252, and MacRoman.");
 		System.out.println("(Make sure that the text columns and any columns used as features have the same names in the new data as they did in the template.)");
 	}
