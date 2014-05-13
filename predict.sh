@@ -3,6 +3,7 @@
 if [ "$#" -lt 1 ] || [ "$#" -gt 1 ] || [ $1 == "-h" ] || [ $1 == "--help" ];
 then
     echo "Usage: ./predict.sh path/to/trained/model [path/to/unlabeled/data]"
+    echo "Predict labels on new data (using an already-trained model), either from a given CSV or from console input."
     exit
 fi
 
