@@ -10,8 +10,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComboBox;
@@ -24,8 +22,8 @@ import edu.cmu.side.model.Recipe;
 import edu.cmu.side.model.RecipeManager;
 import edu.cmu.side.view.WorkbenchPanel;
 import edu.cmu.side.view.util.EventQueueProxy;
-import edu.cmu.side.view.util.SystemMonitorPanel;
 import edu.cmu.side.view.util.Refreshable;
+import edu.cmu.side.view.util.SystemMonitorPanel;
 
 
 public class Workbench{
@@ -183,4 +181,6 @@ public class Workbench{
 			dropdown.setSelectedIndex(-1);
 		}
 	}
+	
+	
 }
