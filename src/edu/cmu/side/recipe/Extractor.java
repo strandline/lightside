@@ -55,13 +55,23 @@ public class Extractor extends Chef
 
 			System.out.println("Loading documents: " + corpusFiles);
 			DocumentList newDocs = ImportController.makeDocumentList(corpusFiles, encoding);
+			
+			if(!newDocs.allAnnotations().containsKey(recipe.getAnnotation()) || !newDocs.allAnnotations().keySet().containsAll(recipe.getDocumentList().getTextColumns()))
+			{
+				System.out.println("\n****");
+				System.out.println("Your new data set "+corpusFiles+" doesn't have the columns needed by this template file:");
+				System.out.println("Class column ["+recipe.getAnnotation() +"], and text columns "+recipe.getDocumentList().getTextColumns()+".");
+				System.out.println("Instead, its columns are "+newDocs.allAnnotations().keySet()+".");
+				System.exit(1);
+			}
+			
 			Recipe result = followRecipe(recipe, newDocs, Stage.MODIFIED_TABLE, recipe.getFeatureTable().getThreshold());
 			
 			File firstDoc = new File(args[4]);
-			result.setRecipeName(firstDoc.getName()+" Features");
 
 			if(!outPath.toLowerCase().endsWith(args[0]))
 			{
+				outPath = outPath.replaceAll("\\.(arff|xml|csv|ARFF|XML|CSV)$", "");
 				outPath += "."+args[0];
 			}
 			
@@ -69,6 +79,9 @@ public class Extractor extends Chef
 
 			File outFile = new File(outPath);
 			FeatureTable trainingTable = result.getTrainingTable();
+			String tableName = firstDoc.getName()+" "+recipe.getFeatureTable().getName();
+			result.setRecipeName(tableName);
+			trainingTable.setName(tableName);
 			
 			System.out.println("Saving in "+args[0]+" format.");
 			if(args[0].equals("arff"))
