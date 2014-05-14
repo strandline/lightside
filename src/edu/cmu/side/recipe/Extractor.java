@@ -59,9 +59,10 @@ public class Extractor extends Chef
 			if(!newDocs.allAnnotations().containsKey(recipe.getAnnotation()) || !newDocs.allAnnotations().keySet().containsAll(recipe.getDocumentList().getTextColumns()))
 			{
 				System.out.println("\n****");
-				System.out.println("Your new data set "+corpusFiles+" doesn't have the columns needed by this template file:");
-				System.out.println("Class column ["+recipe.getAnnotation() +"], and text columns "+recipe.getDocumentList().getTextColumns()+".");
-				System.out.println("Instead, its columns are "+newDocs.allAnnotations().keySet()+".");
+				System.out.println("Your new data set "+corpusFiles);
+				System.out.println("doesn't have the columns needed by the template file "+recipePath);
+				System.out.println("It needs a class column ["+recipe.getAnnotation() +"], and text columns "+recipe.getDocumentList().getTextColumns()+".");
+				System.out.println("Instead, its columns are "+newDocs.allAnnotations().keySet()+".\n");
 				System.exit(1);
 			}
 			
@@ -110,11 +111,16 @@ public class Extractor extends Chef
 
 	public static void printUsage()
 	{
+		System.out.println();
 		System.out.println("Usage: ./extract.sh {arff|csv|xml} {data-encoding} path/to/template.xml path/to/output/table path/to/data.csv...");
+		System.out.println();
 		System.out.println("Extracts a new feature table with the same extraction settings as template.xml (any saved LightSide feature table or model)");
-		System.out.println("Feature table can be saved in ARFF, CSV, or LightSide XML formats.");
+		System.out.println("Feature tables can be saved in ARFF, CSV, or LightSide XML formats.");
 		System.out.println("Common data encodings are UTF-8, windows-1252, and MacRoman.");
-		System.out.println("(Make sure that the text columns and any columns used as features have the same names in the new data as they did in the template.)");
+		System.out.println();
+		System.out.println("(Make sure that the template's class column, text columns, and any columns used as features,");
+		System.out.println(" all exist with the same names in the new data.)");
+		System.out.println();
 	}
 
 }
