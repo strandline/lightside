@@ -1,9 +1,11 @@
 #!/bin/bash
 
 # Usage: scripts/predict.sh path/to/saved/model.xml [{data-encoding} path/to/unlabeled/data.csv...]
-# Outputs tab-separated predictions for new instances, using the given model.
+# Outputs tab-separated predictions for new instances, using the given model. (instance number, prediction, text)
 # If no new data file is given, instances are read from the standard input.
 # Common tab encodings are UTF-8, windows-1252, and MacRoman.
+# (Make sure that the text columns and any columns used as features 
+#  have the same names in the new data as they did in the training set.)
 
 
 MAXHEAP="4g"
