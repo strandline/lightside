@@ -9,6 +9,14 @@
 		<jarfile>genesis.jar</jarfile>
 		<classname>plugins.input.CSVParser</classname>
 	</plugin>
+	<plugin>
+		<name>ARFF Parser</name>
+		<author>David Adamson</author>
+		<version>1.0</version>
+		<description>Build DocumentList From ARFF file></description>
+		<jarfile>genesis.jar</jarfile>
+		<classname>plugins.input.ARFFParser</classname>
+	</plugin>
 	
     <!--FeaturePlugin-->
     <!--     <plugin>
@@ -182,6 +190,15 @@
 		<description>Basic model accuracy evaluations></description>
 		<jarfile>genesis.jar</jarfile>
 		<classname>plugins.metrics.models.BasicModelEvaluations</classname>
+	</plugin>
+	
+	<plugin>
+		<name>More Model Metrics </name>
+		<author>Elijah Mayfield</author>
+		<version>1.0</version>
+		<description>Precision, Recall, F1, F2</description>
+		<jarfile>genesis.jar</jarfile>
+		<classname>plugins.metrics.models.PrecisionRecallModelEvaluations</classname>
 	</plugin>
 
     <!--EvaluateOneModelPlugin-->

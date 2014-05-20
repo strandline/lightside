@@ -112,7 +112,7 @@ public class Extractor extends Chef
 	public static void printUsage()
 	{
 		System.out.println();
-		System.out.println("Usage: ./extract.sh {arff|csv|xml} {data-encoding} path/to/template.xml path/to/output/table path/to/data.csv...");
+		System.out.println("Usage: scripts/extract.sh {arff|csv|xml} {data-encoding} path/to/template.xml path/to/output/table path/to/data.csv...");
 		System.out.println();
 		System.out.println("Extracts a new feature table with the same extraction settings as template.xml (any saved LightSide feature table or model)");
 		System.out.println("Feature tables can be saved in ARFF, CSV, or LightSide XML formats.");
