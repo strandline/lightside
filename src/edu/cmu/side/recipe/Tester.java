@@ -1,7 +1,6 @@
 package edu.cmu.side.recipe;
 
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -10,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import org.apache.commons.io.output.FileWriterWithEncoding;
 
 import com.yerihyo.yeritools.csv.CSVWriter;
 
