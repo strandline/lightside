@@ -154,29 +154,35 @@ public class Predictor
 			// List<String>>(newDocs.allAnnotations()),
 			// predictTable.getAnnotation());
 
-			newDocs.addAnnotation(predictionColumn, (List<String>) result.getPredictions(), overWrite);
-			int size = newDocs.getSize();
-			if (addDistributionColumns)
-			{
-				Map<String, List<Double>> distributions = result.getDistributions();
-				for (String label : distributions.keySet())
-				{
-					List<String> stringDists = new ArrayList<String>(size);
-					for (Double d : distributions.get(label))
-					{
-						stringDists.add(d.toString());
-					}
-					newDocs.addAnnotation(predictionColumn + "_" + label, stringDists, overWrite);
-				}
-			}
-
-			return newDocs;
+			return Predictor.addPredictionsToDocumentList(predictionColumn, addDistributionColumns, overWrite, result, newDocs);
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public static DocumentList addPredictionsToDocumentList(String predictionColumn, boolean addDistributionColumns, boolean overWrite, PredictionResult result,
+			DocumentList newDocs)
+	{
+		newDocs.addAnnotation(predictionColumn, (List<String>) result.getPredictions(), overWrite);
+		int size = newDocs.getSize();
+		if (addDistributionColumns)
+		{
+			Map<String, List<Double>> distributions = result.getDistributions();
+			for (String label : distributions.keySet())
+			{
+				List<String> stringDists = new ArrayList<String>(size);
+				for (Double d : distributions.get(label))
+				{
+					stringDists.add(d.toString());
+				}
+				newDocs.addAnnotation(predictionColumn + "_" + label, stringDists, overWrite);
+			}
+		}
+
+		return newDocs;
 	}
 
 	public void calculatePredictionStats(FeatureTable predictTable)
