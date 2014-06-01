@@ -29,9 +29,11 @@ import edu.cmu.side.model.data.TrainingResult;
 import edu.cmu.side.model.feature.Feature.Type;
 import edu.cmu.side.model.feature.FeatureHit;
 import edu.cmu.side.plugin.FeaturePlugin;
+import edu.cmu.side.plugin.ModelMetricPlugin;
 import edu.cmu.side.plugin.RestructurePlugin;
 import edu.cmu.side.plugin.SIDEPlugin;
 import edu.cmu.side.plugin.control.ImportController;
+import edu.cmu.side.plugin.control.PluginManager;
 import edu.cmu.side.recipe.converters.ConverterControl;
 import edu.cmu.side.recipe.converters.ConverterControl.RecipeFileFormat;
 import edu.cmu.side.view.util.RecipeExporter;
@@ -158,11 +160,11 @@ public class Chef
 	public static Recipe followRecipe(Recipe originalRecipe, DocumentList corpus, Stage finalStage, int newThreshold) throws Exception
 	{
 		Recipe newRecipe = followSimmerSteps(originalRecipe, corpus, finalStage, newThreshold);
-
-		if (finalStage.compareTo(Stage.TRAINED_MODEL) < 0) return newRecipe;
-
-		broilModel(newRecipe);
-		printMemoryUsage();
+		
+		if (finalStage.compareTo(Stage.MODIFIED_TABLE) > 0)
+		{
+			broilModel(newRecipe);
+		}
 		return newRecipe;
 	}
 
@@ -176,8 +178,13 @@ public class Chef
 	protected static Recipe broilModel(Recipe newRecipe) throws Exception
 	{
 		if (!quiet) logger.info("Training model with " + newRecipe.getLearner() + "...");
-		TrainingResult trainResult = newRecipe.getLearner().train(newRecipe.getTrainingTable(), newRecipe.getLearnerSettings(),
-				newRecipe.getValidationSettings(), newRecipe.getWrappers(), textUpdater);
+		FeatureTable trainingTable = newRecipe.getTrainingTable();
+		Map<String, String> learnerSettings = newRecipe.getLearnerSettings();
+		Map<String, Serializable> validationSettings = newRecipe.getValidationSettings();
+		OrderedPluginMap wrappers = newRecipe.getWrappers();
+		
+		TrainingResult trainResult = newRecipe.getLearner().train(trainingTable, learnerSettings,
+				validationSettings, wrappers, textUpdater);
 		newRecipe.setTrainingResult(trainResult);
 		newRecipe.setLearnerSettings(newRecipe.getLearner().generateConfigurationSettings());
 		return newRecipe;
@@ -218,6 +225,7 @@ public class Chef
 
 	public static void main(String[] args) throws Exception
 	{
+		quiet = false;
 		String recipePath, outPath;
 		if (args.length < 5 || !Arrays.asList("predict", "full").contains(args[0]))
 		{
@@ -310,14 +318,37 @@ public class Chef
 		if (recipe.getStage().compareTo(Stage.TRAINED_MODEL) >= 0)
 		{
 			TrainingResult trainingResult = recipe.getTrainingResult();
-			logger.info(trainingResult.getTextConfusionMatrix());
-			for (Entry<String, String> eval : trainingResult.getCachedEvaluations().entrySet())
-			{
-				System.out.println(eval.getKey() + ":\t" + eval.getValue());
-			}
+			printEvaluations(trainingResult);
 		}
 	}
 
+	public static void printEvaluations(TrainingResult trainingResult)
+	{
+		System.out.println("Confusion Matrix (act \\ pred):");
+		System.out.println(trainingResult.getTextConfusionMatrix());
+		
+		SIDEPlugin[] plugins = PluginManager.getSIDEPluginArrayByType(ModelMetricPlugin.type);
+		
+		for(SIDEPlugin plug : plugins)
+		{
+			ModelMetricPlugin metricPlugin = (ModelMetricPlugin) plug;
+			Map<String, String> evaluations = metricPlugin.evaluateModel(trainingResult, null);
+			System.out.println(plug.toString());
+			for (Entry<String, String> eval : evaluations.entrySet())
+			{
+				try
+				{
+					System.out.printf("%10s:\t%.4f\n", eval.getKey(), Double.parseDouble(eval.getValue()));
+				}
+				catch(NumberFormatException e)
+				{
+					System.out.printf("%10s:\t%s\n", eval.getKey(),eval.getValue());
+				}
+			}
+			System.out.println();
+		}
+	}
+	
 	public static void setQuiet(boolean b)
 	{
 		quiet = b;

@@ -15,6 +15,7 @@ import com.yerihyo.yeritools.csv.CSVWriter;
 import edu.cmu.side.model.Recipe;
 import edu.cmu.side.model.RecipeManager.Stage;
 import edu.cmu.side.model.data.DocumentList;
+import edu.cmu.side.model.data.FeatureTable;
 import edu.cmu.side.model.data.PredictionResult;
 import edu.cmu.side.model.data.TrainingResult;
 import edu.cmu.side.plugin.ModelMetricPlugin;
@@ -63,38 +64,22 @@ public class Tester extends Chef
 
 			if (!quiet) logger.info("Loading documents: " + corpusFiles);
 			DocumentList newDocs = ImportController.makeDocumentList(corpusFiles, encoding);
-			Recipe extracted = followRecipe(recipe, newDocs, Stage.MODIFIED_TABLE, recipe.getFeatureTable().getThreshold());
+			Recipe extracted = followRecipe(recipe, newDocs, Stage.MODIFIED_TABLE, 0);
+			FeatureTable newFeatures = extracted.getTrainingTable();
+			//System.out.println("Original "+recipe.getTrainingTable().getFeatureSet().size());
+			//System.out.println("Extracted "+newFeatures.getFeatureSet().size());
+			//newFeatures.reconcileFeatures(recipe.getFeatureTable().getFeatureSet());
+			//System.out.println("Reconciled "+newFeatures.getFeatureSet().size());
+
 			
 			Predictor p = new Predictor(recipe, recipe.getAnnotation()+"_predicted");
-			PredictionResult preds = p.predictFromTable(extracted.getTrainingTable());
+			PredictionResult preds = p.predictFromTable(newFeatures);
 
 			TrainingResult trainingResult = new TrainingResult(recipe.getTrainingTable(), extracted.getTrainingTable(), preds);
 			
-			System.out.println("Confusion Matrix (act \\ pred):");
-			System.out.println(trainingResult.getTextConfusionMatrix());
+			printEvaluations(trainingResult);
 			
-			SIDEPlugin[] plugins = PluginManager.getSIDEPluginArrayByType(ModelMetricPlugin.type);
-			
-			for(SIDEPlugin plug : plugins)
-			{
-				ModelMetricPlugin metricPlugin = (ModelMetricPlugin) plug;
-				Map<String, String> evaluations = metricPlugin.evaluateModel(trainingResult, null);
-				System.out.println(plug.toString());
-				for (Entry<String, String> eval : evaluations.entrySet())
-				{
-					try
-					{
-						System.out.printf("%10s:\t%.4f\n", eval.getKey(), Double.parseDouble(eval.getValue()));
-					}
-					catch(NumberFormatException e)
-					{
-						System.out.printf("%10s:\t%s\n", eval.getKey(),eval.getValue());
-					}
-				}
-				System.out.println();
-			}
-			
-			System.out.println("adding predictions to output file "+outPath);
+			System.out.println("Writing predictions to output file "+outPath);
 			Predictor.addPredictionsToDocumentList(p.predictionAnnotation, false, false, preds, newDocs);
 			FileOutputStream out = new FileOutputStream(outPath);
 			OutputStreamWriter writer = new OutputStreamWriter(out, encoding);
@@ -137,6 +122,8 @@ public class Tester extends Chef
 			System.exit(1);
 		}
 	}
+
+	
 
 	public static void printUsage()
 	{

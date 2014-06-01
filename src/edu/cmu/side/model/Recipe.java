@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.TreeMap;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
@@ -317,8 +317,11 @@ public class Recipe implements Serializable
 		newRecipe.setLearner(prior.getLearner());
 		newRecipe.setLearnerSettings(prior.getLearnerSettings());
 		
-		//these are not needed for prediction, and  redundantly include the document list
-//		newRecipe.setValidationSettings(prior.getValidationSettings());
+		//FIXME: verify that these don't redundantly include the document list.
+		Map<String, Serializable> slimValidationSettings = new TreeMap<String, Serializable>(prior.getValidationSettings());
+		slimValidationSettings.remove("testSet");
+		
+		newRecipe.setValidationSettings(slimValidationSettings);
 		
 		String newRecipeName = prior.getRecipeName();
 		if(newRecipeName.endsWith(".side"))
