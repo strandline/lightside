@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <plugins>
     <!--FileParser-->
 	<plugin>
@@ -35,7 +36,6 @@
 		<jarfile>genesis.jar</jarfile>
 		<classname>plugins.features.InternationalBasicFeatures</classname>
 	</plugin>   
-	 
 	<plugin>
 		<name>Basic Features</name>
 		<author>Elijah Mayfield</author>
@@ -111,17 +111,7 @@
     </plugin> -->
 
     <!--RestructurePlugin-->
-
 	<plugin>
-		<name>Sequence Restructuring</name>
-		<author>David Adamson</author>
-		<version>0.0</version>
-		<description>Restructure data for new-sequence training</description>
-		<jarfile>sequences.jar</jarfile>
-		<classname>sequence.plugins.SequenceTrainingRestructurePlugin</classname>
-	</plugin>    
-
-    <plugin>
 		<name>GrowthModel</name>
 		<author>Elijah Mayfield</author>
 		<version>1.0</version>
@@ -159,15 +149,6 @@
 	</plugin>
 	
 	<plugin>
-        <name>Change Feature Table Class</name>
-        <author>David Adamson</author>
-        <version>0.1</version>
-        <description>Change Feature Table Class</description>
-        <jarfile>genesis.jar</jarfile>
-        <classname>plugins.restructure.ChangeFeatureTableClassPlugin</classname>
-    </plugin>
-    
-	<plugin>
         <name>Combine Feature Tables</name>
         <author>David Adamson</author>
         <version>0.1</version>
@@ -176,6 +157,14 @@
         <classname>plugins.restructure.CombineFeatureTablesPlugin</classname>
     </plugin>
 
+	<plugin>
+        <name>Change Feature Table Class</name>
+        <author>David Adamson</author>
+        <version>0.1</version>
+        <description>Change Feature Table Class</description>
+        <jarfile>genesis.jar</jarfile>
+        <classname>plugins.restructure.ChangeFeatureTableClassPlugin</classname>
+    </plugin>
 
     <!--FeatureMetricPlugins-->
 	<plugin>
@@ -218,26 +207,6 @@
 		<jarfile>genesis.jar</jarfile>
 		<classname>plugins.metrics.models.BasicModelEvaluations</classname>
 	</plugin>
-	
-	<plugin>
-		<name>More Model Metrics </name>
-		<author>David Adamson</author>
-		<version>1.0</version>
-		<description>Precision, Recall, F1, F2</description>
-		<jarfile>genesis.jar</jarfile>
-		<classname>plugins.metrics.models.PrecisionRecallModelEvaluations</classname>
-	</plugin>
-	
-	
-    <plugin>
-        <name>Advanced Model Evaluations</name>
-        <author>Elijah Mayfield</author>
-        <version>1.0</version>
-        <description><![CDATA[Basic Fscore evaluations]]></description>
-        <jarfile>warpcore.jar</jarfile>
-        <classname>com.lightsidelabs.plugins.metrics.models.AdvancedModelEvaluations
-        </classname>
-    </plugin>
 
     <!--EvaluateOneModelPlugin-->
 
@@ -250,7 +219,6 @@
 		<classname>plugins.analysis.one.metric.FeatureMetricAnalysis
 		</classname>
 	</plugin>
-	
 
 	<plugin>
 		<name>Document Display Plugins</name>
