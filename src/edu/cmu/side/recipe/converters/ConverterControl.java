@@ -73,6 +73,7 @@ public class ConverterControl
 			catch(IOException e)
 			{
 				ex = new IOException("Couldn't load recipe in any format: "+recipePath, e);
+				e.printStackTrace();
 			}	
 		}
 		throw ex;

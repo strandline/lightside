@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 import edu.cmu.side.Workbench;
@@ -164,6 +165,7 @@ public class RestructureTablesControl extends GenesisControl{
 			catch (Exception e)
 			{
 				e.printStackTrace();
+				JOptionPane.showMessageDialog(null, "Couldn't restructure this feature table.\n"+e.getMessage(), "Restructuring Error", JOptionPane.WARNING_MESSAGE);
 			}			
 		}
 

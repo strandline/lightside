@@ -166,7 +166,14 @@ public class Predictor
 	public static DocumentList addPredictionsToDocumentList(String predictionColumn, boolean addDistributionColumns, boolean overWrite, PredictionResult result,
 			DocumentList newDocs)
 	{
-		newDocs.addAnnotation(predictionColumn, (List<String>) result.getPredictions(), overWrite);
+		List<String> annotationStrings = new ArrayList<String>(newDocs.getSize());
+		
+		for(Comparable c : result.getPredictions())
+		{
+			annotationStrings.add(c.toString());
+		}
+		
+		newDocs.addAnnotation(predictionColumn, annotationStrings, overWrite);
 		int size = newDocs.getSize();
 		if (addDistributionColumns)
 		{

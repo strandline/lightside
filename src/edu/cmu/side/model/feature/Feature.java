@@ -63,7 +63,7 @@ public class Feature implements Serializable, Comparable<Feature>
 		{
 			typeString+=LABEL_JOIN+StringUtils.join(getNominalValues(), LABEL_JOIN);
 		}
-		return getExtractor().getClass().getName()+FEATURE_JOIN+getExtractorPrefix()+FEATURE_JOIN+getFeatureName()+FEATURE_JOIN+getFeatureType();
+		return getExtractor().getClass().getName()+FEATURE_JOIN+getExtractorPrefix()+FEATURE_JOIN+getFeatureName()+FEATURE_JOIN+typeString;
 	}
 	
 	public static Feature fetchFeature(String encoded) throws IllegalStateException

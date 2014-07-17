@@ -15,16 +15,17 @@ import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.process.DocumentPreprocessor;
 import edu.stanford.nlp.process.PTBTokenizer.PTBTokenizerFactory;
 import edu.stanford.nlp.process.Tokenizer;
-import edu.stanford.nlp.process.WhitespaceTokenizer.WhitespaceTokenizerFactory;
+import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import edu.stanford.nlp.util.StringUtils;
 
 public class TokenizingTools
 {
+	public static final String DEFAULT_TAGGER_MODEL = "toolkits/maxent/english-caseless-left3words-distsim.tagger";
 	private static MaxentTagger tagger;
-	private static PTBTokenizerFactory<CoreLabel> factory;
+	private static TokenizerFactory<CoreLabel> factory;
 
-	protected static PTBTokenizerFactory<CoreLabel> getTokenizerFactory()
+	protected static TokenizerFactory<CoreLabel> getTokenizerFactory()
 	{
 		if (factory == null)//does this duplicated outer check save lock-time?
 		{
@@ -46,7 +47,7 @@ public class TokenizingTools
 			synchronized(TokenizingTools.class)
 			{
 				if(tagger == null)
-					tagger = new MaxentTagger("toolkits/maxent/english-caseless-left3words-distsim.tagger");
+					tagger = new MaxentTagger(DEFAULT_TAGGER_MODEL);
 			}
 		}
 		catch (Exception e)

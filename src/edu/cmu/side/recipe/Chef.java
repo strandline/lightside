@@ -78,8 +78,14 @@ public class Chef
 		}
 	};
 
-	// Extract Features
+
 	protected static void simmerFeatures(Recipe recipe, int threshold, String annotation, Type type)
+	{
+		simmerFeatures(recipe, threshold, annotation, type, recipe.getStage());
+	}
+	
+	// Extract Features
+	protected static void simmerFeatures(Recipe recipe, int threshold, String annotation, Type type, Stage finalStage)
 	{
 		final DocumentList corpus = recipe.getDocumentList();
 		final OrderedPluginMap extractors = recipe.getExtractors();
@@ -105,9 +111,7 @@ public class Chef
 		recipe.setFeatureTable(ft);
 
 		if (!quiet) logger.info("Chef: Done building feature table!");
-		if (recipe.getStage().compareTo(Stage.MODIFIED_TABLE) >= 0) // recipe
-																	// includes
-																	// filtering
+		if (finalStage.compareTo(Stage.MODIFIED_TABLE) >= 0) 
 		{
 			for (SIDEPlugin plug : recipe.getFilters().keySet())
 			{
@@ -133,7 +137,7 @@ public class Chef
 
 		if (!corpus.allAnnotations().containsKey(annotation)) annotation = null;
 
-		simmerFeatures(newRecipe, newThreshold, annotation, originalRecipe.getClassValueType());
+		simmerFeatures(newRecipe, newThreshold, annotation, originalRecipe.getClassValueType(), finalStage);
 
 		return newRecipe;
 	}
