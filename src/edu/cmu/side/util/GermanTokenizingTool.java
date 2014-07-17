@@ -14,7 +14,8 @@ public class GermanTokenizingTool extends AbstractTokenizingTool
 	protected TokenizerFactory<CoreLabel> createTokenizerFactory()
 	{
 		// FIXME: there is no special german tagger
-		return new WhitespaceTokenizerFactory<CoreLabel>(new CoreLabelTokenFactory(true), "invertible,unicodeQuotes=true,untokenizable=firstKeep");
+		//return new WhitespaceTokenizerFactory<CoreLabel>(new CoreLabelTokenFactory(true), "invertible,unicodeQuotes=true,untokenizable=firstKeep");
+		return PTBTokenizerFactory.newPTBTokenizerFactory(new CoreLabelTokenFactory(true), "invertible,unicodeQuotes=true,untokenizable=firstKeep");
 	}
 
 	@Override

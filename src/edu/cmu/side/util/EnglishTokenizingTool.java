@@ -12,7 +12,6 @@ public class EnglishTokenizingTool extends AbstractTokenizingTool
 	@Override
 	protected TokenizerFactory<CoreLabel> createTokenizerFactory()
 	{
-		// TODO Auto-generated method stub
 		return PTBTokenizerFactory.newPTBTokenizerFactory(new CoreLabelTokenFactory(true), "invertible,unicodeQuotes=true,untokenizable=firstKeep");
 	}
 
