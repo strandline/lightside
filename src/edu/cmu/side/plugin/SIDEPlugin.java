@@ -183,4 +183,9 @@ public abstract class SIDEPlugin implements Cloneable, Comparable<SIDEPlugin>
 	{
 		SIDEPlugin.useSharedPluginsInDeserializedRecipes = singletons;
 	}
+	
+	public boolean settingsMatch(Map<String, String> settingsA, Map<String, String> settingsB)
+	{
+		return settingsA.equals(settingsB);
+	}
 }
