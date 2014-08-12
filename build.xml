@@ -50,14 +50,24 @@
 	
 
 	<target name="build" depends="clean,compile,test"/>
+
+	<target name="compile" depends="compile-lightside,compile-tests"/>
 	
-    <target depends="init" name="compile">
+    <target depends="init" name="compile-lightside">
         <echo message="${ant.project.name}: ${ant.file}"/>
         <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
             <src path="src"/>
-            <src path="tests"/>
         	
             <classpath refid="lightside.buildpath"/>
+        </javac>
+    </target>
+	
+    <target depends="init" name="compile-tests">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
+            <src path="tests"/>
+        	
+            <classpath refid="lightside.testpath"/>
         </javac>
     </target>
 	
