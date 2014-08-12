@@ -74,9 +74,7 @@ public class FeaturePluginTest extends TestCase
 			public void update(String updateSlot, int slot1, int slot2) {}
 			public void update(String update) {}
 			public void reset() {}});
-		
-		System.out.println(hits);
-		System.out.println(hits.size());
+		System.out.println(hits.size() + " features extracted.");
 		assertTrue(hits.size() == 1062);
 	}
 
