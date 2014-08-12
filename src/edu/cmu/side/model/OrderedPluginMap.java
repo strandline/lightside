@@ -26,20 +26,37 @@ public class OrderedPluginMap implements SortedMap<SIDEPlugin, Map<String, Strin
 	private List<SIDEPlugin> ordering = new ArrayList<SIDEPlugin>();
 	private Map<SIDEPlugin, Map<String, String>> configurations = new HashMap<SIDEPlugin, Map<String, String>>();
 
+	public OrderedPluginMap()
+	{}
+	
+	public OrderedPluginMap(OrderedPluginMap other)
+	{
+		ordering = new ArrayList<SIDEPlugin>(other.ordering);
+		configurations  = new HashMap<SIDEPlugin, Map<String, String>>(other.configurations);
+	}
+
 	public int getOrdering(Object s)
 	{
 		return ordering.indexOf(s);
 	}
 	
-	public boolean equals(OrderedPluginMap other){
-		boolean toReturn = true;
-		for(SIDEPlugin plug: ordering){
-			if(this.getOrdering(plug) != other.getOrdering(plug)) toReturn = false;
-			if(!this.get(plug).equals(other.get(plug))) toReturn = false;
+	public boolean equals(OrderedPluginMap other)
+	{
+		//ensure that all the same plugins are present
+		if (!this.keySet().equals(other.keySet())) return false;
+		
+		for (SIDEPlugin plug : ordering)
+		{
+			//ensure the plugins are in the same order
+			if (this.getOrdering(plug) != other.getOrdering(plug)) return false;
+
+			//ensure that the plugins have the same settings (excluding any learned values)
+			if (!plug.settingsMatch(this.get(plug), other.get(plug))) return false;
 		}
-		if(!this.keySet().equals(other.keySet())) toReturn = false;
-		return toReturn;
+		return true;
 	}
+	
+	
 	private transient OrderedPluginComparator comparator = new OrderedPluginComparator(this);
 
 	@Override

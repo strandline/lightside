@@ -127,7 +127,6 @@ public class ParallelTaskUpdater extends JPanel implements StatusUpdater
 	synchronized public void reset() {
 		textLabel.setText("");
 		completion = new Completion[completion.length];
-		System.out.println(completion.length+" tasks");
 		canvas.repaint();
 	}
 	
@@ -135,7 +134,6 @@ public class ParallelTaskUpdater extends JPanel implements StatusUpdater
 	{
 		textLabel.setText("");
 		completion = new Completion[numTasks];
-		System.out.println(completion.length+" tasks");
 		canvas.repaint();
 	}
 }

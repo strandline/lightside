@@ -367,11 +367,11 @@ public abstract class LearningPlugin extends SIDEPlugin implements Serializable
 		return results;
 	}
 
-	protected TrainingResult evaluateTestSet(FeatureTable train, FeatureTable testSet, OrderedPluginMap wrappers, StatusUpdater updater) throws Exception
+	public TrainingResult evaluateTestSet(FeatureTable wrappedTrain, FeatureTable testSet, OrderedPluginMap wrappers, StatusUpdater updater) throws Exception
 	{
 		DefaultMap<Integer, Integer> defaultFoldMap = new DefaultMap<Integer, Integer>(0);
-		PredictionResult predictions = predictOnFold(train, testSet, 0, defaultFoldMap, updater, wrappers);
-		TrainingResult training = new TrainingResult(train, testSet, predictions);
+		PredictionResult predictions = predictOnFold(wrappedTrain, testSet, 0, defaultFoldMap, updater, wrappers);
+		TrainingResult training = new TrainingResult(wrappedTrain, testSet, predictions);
 		return training;
 	}
 
