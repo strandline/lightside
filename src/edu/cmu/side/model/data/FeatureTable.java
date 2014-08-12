@@ -685,38 +685,35 @@ public class FeatureTable implements Serializable
 		boolean returnStatement = true;
 		if (this.documents != null)
 		{
-			returnStatement = this.documents.equals(other.getDocumentList()) ? returnStatement : false;
+			if(! this.documents.equals(other.getDocumentList()) ) return false;
 		}
 		else
 		{
-			returnStatement = other.getDocumentList() == null ? returnStatement : false;
+			if(other.getDocumentList() != null ) return false;
 		}
 
-		returnStatement = this.threshold.equals(other.threshold) ? returnStatement : false;
-		returnStatement = this.getAnnotation().equals(other.getAnnotation()) ? returnStatement : false;
-		returnStatement = this.getClassValueType().equals(other.getClassValueType()) ? returnStatement : false;
+		if(!this.threshold.equals(other.threshold)) return false;
+		if(!this.getAnnotation().equals(other.getAnnotation())) return false;
+		if(!this.getClassValueType().equals(other.getClassValueType())) return false;
+		
 		if (this.getFeatureSet().equals(other.getFeatureSet()))
 		{
 			for (Feature feat : this.getFeatureSet())
 			{
-				returnStatement = this.getHitsForFeature(feat).equals(other.getHitsForFeature(feat)) ? returnStatement : false;
+				if(!this.getHitsForFeature(feat).equals(other.getHitsForFeature(feat)))
+					return false;
 			}
 		}
 		else
 		{
-			returnStatement = false;
+			return false;
 		}
-		if (this.getDocumentList().equals(other.getDocumentList()))
+
+		for (int i = 0; i < this.hitsPerDocument.size(); i++)
 		{
-			for (int i = 0; i < this.hitsPerDocument.size(); i++)
-			{
-				returnStatement = this.getHitsForDocument(i).equals(other.getHitsForDocument(i)) ? returnStatement : false;
-			}
+			if(! this.getHitsForDocument(i).equals(other.getHitsForDocument(i)) )
+				return false;
 		}
-		else
-		{
-			returnStatement = false;
-		}
-		return returnStatement;
+		return true;
 	}
 }
