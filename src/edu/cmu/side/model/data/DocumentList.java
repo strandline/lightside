@@ -41,6 +41,7 @@ public class DocumentList implements Serializable
 	
 //	String[] annotationNames = null;
 	String[] labelArray = null;
+	String[] numericLabelArray = null;
 
 	protected final static Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
@@ -518,35 +519,45 @@ public class DocumentList implements Serializable
 	
 	public String[] getLabelArray(String column, Type t)
 	{
-		if (!column.equals(currentAnnotation) || labelArray == null)
+		if (t == Type.NUMERIC)
 		{
-			Set<String> labelSet = new TreeSet<String>();
-			switch (t)
+			if (column.equals(currentAnnotation) && numericLabelArray != null)
+				return numericLabelArray;
+			else
 			{
-				case NOMINAL:
-				case BOOLEAN:
-					if(!allAnnotations.containsKey(column))
-						return new String[]{};
-					
-					List<String> labels = getAnnotationArray(column);
-					if (labels != null)
-					{
-						for (String s : labels)
-						{
-							labelSet.add(s);
-						}
-					}
-					break;
-				case NUMERIC:
-					for (int i = 0; i < 5; i++)
-					{
-						labelSet.add("Q" + (i + 1));
-					}
-					break;
+				Set<String> labelSet = new TreeSet<String>();
+				for (int i = 0; i < 5; i++)
+				{
+					labelSet.add("Q" + (i + 1));
+				}
+				numericLabelArray = labelSet.toArray(new String[0]);
+				return numericLabelArray;
 			}
-			labelArray = labelSet.toArray(new String[0]);
 		}
-		return labelArray;
+		else
+		{
+			if (column.equals(currentAnnotation) && labelArray != null)
+			{
+				return labelArray;
+			}
+			else
+			{
+				if (!allAnnotations.containsKey(column)) return new String[] {};
+
+				Set<String> labelSet = new TreeSet<String>();
+
+				List<String> labels = getAnnotationArray(column);
+				if (labels != null)
+				{
+					for (String s : labels)
+					{
+						labelSet.add(s);
+					}
+				}
+				labelArray = labelSet.toArray(new String[0]);
+				return labelArray;
+			}
+		}
 	}
 	
 	/**
