@@ -98,7 +98,7 @@ public class SystemMonitorPanel extends JPanel
 				catch (FileNotFoundException e1)
 				{ versionString = "";}
 				
-				JLabel welcome = new JLabel("<html><b>LightSide Researcher's Workbench</b><br>"+versionString+"<br><br>"
+				JLabel welcome = new JLabel("<html><b>LightSide Researcher's Workbench</b><br>Version "+versionString+"<br><br>"
 						+ "Thanks for using LightSide!<br>If you need help, here's a few places to start:</html>");
 				welcome.setFont(welcome.getFont().deriveFont(14.0f));
 				body.add("left", welcome);
