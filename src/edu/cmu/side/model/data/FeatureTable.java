@@ -204,7 +204,6 @@ public class FeatureTable implements Serializable
 		numericConvertedClassValues.clear();
 		nominalConvertedClassValues.clear();
 		DocumentList localDocuments = getDocumentList();
-		type = getClassValueType();
 		switch(type){
 		case NOMINAL:
 		case BOOLEAN:
