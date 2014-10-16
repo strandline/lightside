@@ -89,15 +89,6 @@
 		<jarfile>genesis.jar</jarfile>
 		<classname>plugins.features.CharacterNGrams</classname>
 	</plugin>
-	
-	<plugin>
-		<name>Roscoe Features</name>
-		<author>David Adamson</author>
-		<version>1.0</version>
-		<description>Roscoe 2013d</description>
-		<jarfile>warpcore.jar</jarfile>
-		<classname>com.lightsidelabs.plugins.features.RoscoeFeatures</classname>
-	</plugin>
 
 	<!-- <plugin> 
 	   <name>Predicted Annotation Feature</name> 
@@ -129,14 +120,14 @@
 		<classname>plugins.restructure.GrowthModel</classname>
 	</plugin>
 
-	<plugin>
+<!-- 	<plugin>
 		<name>Regroup Features</name>
 		<author>Elijah Mayfield</author>
 		<version>1.0</version>
 		<description>Regroup instances by column></description>
 		<jarfile>genesis.jar</jarfile>
 		<classname>plugins.restructure.RegroupPlugin</classname>
-	</plugin> 
+	</plugin> -->
 
 	<plugin>
 		<name>Filter Feature Values</name>
@@ -216,26 +207,6 @@
 		<jarfile>genesis.jar</jarfile>
 		<classname>plugins.metrics.models.BasicModelEvaluations</classname>
 	</plugin>
-	
-	<!-- <plugin>
-		<name>More Model Metrics </name>
-		<author>David Adamson</author>
-		<version>1.0</version>
-		<description>Precision, Recall, F1, F2</description>
-		<jarfile>genesis.jar</jarfile>
-		<classname>plugins.metrics.models.PrecisionRecallModelEvaluations</classname>
-	</plugin> -->
-	
-	
-    <plugin>
-        <name>Advanced Model Evaluations</name>
-        <author>Elijah Mayfield</author>
-        <version>1.0</version>
-        <description><![CDATA[Basic Fscore evaluations]]></description>
-        <jarfile>warpcore.jar</jarfile>
-        <classname>com.lightsidelabs.plugins.metrics.models.AdvancedModelEvaluations
-        </classname>
-    </plugin>
 
     <!--EvaluateOneModelPlugin-->
 
