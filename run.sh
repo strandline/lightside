@@ -7,6 +7,8 @@ OTHER_ARGS="-XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode"
 
 if [ `uname` == "Darwin" ]; then
     OS_ARGS="-Xdock:icon=toolkits/icons/bulbs/bulb_128.png -Xdock:name=LightSide"
+elif [ `uname` == "Linux" ]; then
+    OS_ARGS="-Dswing.defaultlaf=javax.swing.plaf.metal.MetalLookAndFeel"
 fi
 
 if [[ -z "$1" ]]; then
