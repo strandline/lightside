@@ -50,16 +50,7 @@ public class Workbench{
 	static Image iconImage; 
 
 	public Workbench()
-	{
-
-		try
-		{
-			// Set System L&F
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		}
-		catch (Exception e)
-		{}
-		
+	{	
 		//try to catch nasty swing exceptions
 		EventQueue queue = Toolkit.getDefaultToolkit().getSystemEventQueue();
 		queue.push(new EventQueueProxy());
