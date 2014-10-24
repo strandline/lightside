@@ -60,8 +60,7 @@ public abstract class ParallelLearningPlugin extends LearningPlugin
 					LearningPlugin clonedLearner;
 					try
 					{
-						clonedLearner = ParallelLearningPlugin.this.getClass().newInstance();
-						clonedLearner.configureFromSettings(learnerSettings);
+						clonedLearner = ParallelLearningPlugin.this.clone();
 					}
 					catch (Exception e)
 					{

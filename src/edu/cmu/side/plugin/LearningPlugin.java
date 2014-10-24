@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-
 import edu.cmu.side.control.BuildModelControl;
 import edu.cmu.side.model.OrderedPluginMap;
 import edu.cmu.side.model.StatusUpdater;
@@ -33,6 +32,8 @@ public abstract class LearningPlugin extends SIDEPlugin implements Serializable
 	public static String type = "model_builder";
 
 	public static StatusUpdater updater;
+	
+	public abstract LearningPlugin clone();
 	
 	protected static DecimalFormat print = new DecimalFormat("#.###");
 
