@@ -137,6 +137,7 @@ public abstract class LearningPlugin extends SIDEPlugin implements Serializable
 		}
 		else
 		{
+			logger.info("Skipping evaluation -- validationSettings['test'] != 'true'");
 			FeatureTable wrappedTable = wrapAndTrain(table, wrappers, progressIndicator, defaultFoldMapZero, 1);
 			List<Comparable<Comparable>> blankPredictions = new ArrayList<Comparable<Comparable>>();
 			Map<String, List<Double>> blankDistributions = new HashMap<String, List<Double>>();
