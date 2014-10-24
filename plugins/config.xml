@@ -207,6 +207,16 @@
 		<jarfile>genesis.jar</jarfile>
 		<classname>plugins.metrics.models.BasicModelEvaluations</classname>
 	</plugin>
+	
+    <plugin>
+        <name>Advanced Model Evaluations</name>
+        <author>Elijah Mayfield</author>
+        <version>1.0</version>
+        <description><![CDATA[Basic Fscore evaluations]]></description>
+        <jarfile>warpcore.jar</jarfile>
+        <classname>com.lightsidelabs.plugins.metrics.models.AdvancedModelEvaluations
+        </classname>
+    </plugin>
 
     <!--EvaluateOneModelPlugin-->
 
