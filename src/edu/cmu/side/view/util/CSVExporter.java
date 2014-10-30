@@ -62,6 +62,12 @@ public class CSVExporter
 				//BufferedWriter bufferedWriter = new BufferedWriter(new FileWriterWithEncoding(file, Charset.forName("UTF-8")));
 				OutputStreamWriter outWriter = new OutputStreamWriter(new FileOutputStream(file), "UTF-8");
 				PrintWriter fileWriter = new PrintWriter(outWriter);
+				
+				System.out.println(model.getColumnCount());
+				for(int i = 0; i < model.getColumnCount(); i++)
+				{
+					System.out.println(model.getColumnName(i));
+				}
 
 				int cols = model.getColumnCount();
 				for (int j = 0; j < cols; ++j)
