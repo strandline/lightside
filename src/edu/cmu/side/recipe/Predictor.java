@@ -1,11 +1,11 @@
 package edu.cmu.side.recipe;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +22,8 @@ import edu.cmu.side.model.data.DocumentList;
 import edu.cmu.side.model.data.FeatureTable;
 import edu.cmu.side.model.data.PredictionResult;
 import edu.cmu.side.plugin.control.ImportController;
+import edu.cmu.side.view.util.CSVExporter;
+import edu.cmu.side.view.util.DocumentListTableModel;
 
 /**
  * loads a model trained using lightSIDE uses it to label new instances.
@@ -361,10 +363,7 @@ public class Predictor
 		{
 			Set<String> corpusFiles = new HashSet<String>();
 
-			for (int i = 2; i < args.length; i++)
-			{
-				corpusFiles.add(args[i]);
-			}
+			corpusFiles.add(args[2]);
 			
 			Charset encoding = Charset.forName(args[1]);
 			logger.info("loading docs from " + corpusFiles);
@@ -372,12 +371,26 @@ public class Predictor
 
 			logger.info("predicting...");
 			PredictionResult predicted = predictor.predict(docs);
-			List<? extends Comparable<?>> predictions = predicted.getPredictions();
-			for (int i = 0; i < docs.getSize(); i++)
+			
+			if(args.length > 3)
 			{
-				String text = docs.getPrintableTextAt(i);
-//				logger.info(predictions.get(i) + "\t" + text.substring(0, Math.min(100, text.length())));
-				actualOut.println(i+"\t"+predictions.get(i) + "\t" + text.substring(0, Math.min(100, text.length())));
+				String outputFilename = args[3];
+				logger.info("saving prediction results to "+outputFilename);
+				docs = Predictor.addPredictionsToDocumentList("predicted", false, false, predicted, docs);
+				DocumentListTableModel docTable = new DocumentListTableModel(docs);
+				docTable.setDocumentList(docs);
+				CSVExporter.exportToCSV(docTable, new File(outputFilename));
+			}
+			
+			else
+			{
+				List<? extends Comparable<?>> predictions = predicted.getPredictions();
+				for (int i = 0; i < docs.getSize(); i++)
+				{
+					String text = docs.getPrintableTextAt(i);
+	//				logger.info(predictions.get(i) + "\t" + text.substring(0, Math.min(100, text.length())));
+					actualOut.println(i+"\t"+predictions.get(i) + "\t" + text.substring(0, Math.min(100, text.length())));
+				}
 			}
 		}
 		else
@@ -408,7 +421,7 @@ public class Predictor
 
 	public static void printUsage()
 	{
-		System.out.println("Usage: ./scripts/predict.sh path/to/saved/model.xml [{data-encoding} path/to/unlabeled/data.csv...]");
+		System.out.println("Usage: ./scripts/predict.sh path/to/saved/model.xml [{data-encoding} path/to/unlabeled/data.csv [path/to/output/file.csv]]");
 		System.out.println("Outputs tab-separated predictions for new instances, using the given model.");
 		System.out.println("If no new data file is given, instances are read from the standard input.");
 		System.out.println("Common data encodings are UTF-8, windows-1252, and MacRoman.");
