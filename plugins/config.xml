@@ -36,14 +36,14 @@
 		<classname>plugins.features.BasicFeatures</classname>
 	</plugin>
     
-	<plugin>
+	<!-- <plugin>
 		<name>International Basic Features</name>
 		<author>Elijah Mayfield</author>
 		<version>1.0</version>
 		<description>Basic TagHelper-like Features</description>
 		<jarfile>genesis.jar</jarfile>
 		<classname>plugins.features.InternationalBasicFeatures</classname>
-	</plugin>   
+	</plugin> -->  
 
 	<plugin>
 		<name>Column Features</name>
@@ -208,7 +208,7 @@
 		<classname>plugins.metrics.models.BasicModelEvaluations</classname>
 	</plugin>
 	
-    <plugin>
+    <!-- <plugin>
         <name>Advanced Model Evaluations</name>
         <author>Elijah Mayfield</author>
         <version>1.0</version>
@@ -216,7 +216,7 @@
         <jarfile>warpcore.jar</jarfile>
         <classname>com.lightsidelabs.plugins.metrics.models.AdvancedModelEvaluations
         </classname>
-    </plugin>
+    </plugin> -->
 
     <!--EvaluateOneModelPlugin-->
 
